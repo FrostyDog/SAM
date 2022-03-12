@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/Kucoin/kucoin-go-sdk"
@@ -70,7 +71,24 @@ func calculateTarget() {
 
 }
 
-func calculatePrice() {
+func calculatePrice(side string) {
+	if side == "sell" {
+		t, err := strconv.ParseFloat(currentPrice, 64)
+		if err != nil {
+			fmt.Println("error accured during parsing")
+		}
+		var p float64 = t + t*0.003
+		targetPrice = fmt.Sprint(p)
+	}
+
+	if side == "buy" {
+		t, err := strconv.ParseFloat(currentPrice, 64)
+		if err != nil {
+			fmt.Println("error accured during parsing")
+		}
+		var p float64 = t - t*0.003
+		targetPrice = fmt.Sprint(p)
+	}
 
 }
 
