@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/Kucoin/kucoin-go-sdk"
 	"github.com/google/uuid"
@@ -17,6 +18,13 @@ const (
 const dSize = "10"
 const dSymbol = "XLM-USDT"
 
+var currentPrice string
+
+var targetOperation string
+var targetPrice string
+
+var isTransaction bool
+
 func main() {
 
 	s := kucoin.NewApiService(
@@ -26,13 +34,48 @@ func main() {
 		kucoin.ApiPassPhraseOption(passphrase),
 		kucoin.ApiKeyVersionOption(kucoin.ApiKeyVersionV2))
 
-	// ticker := time.NewTicker(3 * time.Second)
-	// for _ = range ticker.C {
-	// 	getPrice(s, dSymbol)
-	// }
+	launchTicker(s)
 
-	buyCoin(s, dSymbol, "0.1800")
+}
 
+func checkOrder(s *kucoin.ApiService) {
+	var params = map[string]string{
+		"tradeType": "TRADE",
+		"staus":     "active",
+	}
+
+	var paginationParam = kucoin.PaginationParam{PageSize: 10, CurrentPage: 0}
+
+	resp, err := s.Orders(params, &paginationParam)
+	if err != nil {
+		fmt.Println("Failed at orders")
+	}
+
+	as := kucoin.OrdersModel{}
+	resp.ReadData(&as)
+
+	log.Printf("length of the orders: %d", len(as))
+}
+
+func launchTicker(s *kucoin.ApiService) {
+
+	ticker := time.NewTicker(5 * time.Second)
+	for _ = range ticker.C {
+		getPrice(s, dSymbol)
+	}
+
+}
+
+func calculateTarget() {
+
+}
+
+func calculatePrice() {
+
+}
+
+func stopTicker(t *time.Ticker) {
+	t.Stop()
 }
 
 func getPrice(s *kucoin.ApiService, symbol string) {
@@ -48,6 +91,8 @@ func getPrice(s *kucoin.ApiService, symbol string) {
 		return
 	}
 
+	currentPrice = as.Price
+
 	log.Printf("Token %s: with Price %s", as.BestAsk, as.Price)
 }
 
@@ -61,6 +106,12 @@ func buyCoin(s *kucoin.ApiService, sy string, price string) {
 
 }
 
-func sellCoin() {
+func sellCoin(s *kucoin.ApiService, sy string, price string) {
+
+	size := dSize
+
+	o := kucoin.CreateOrderModel{ClientOid: uuid.New().String(), Side: "sell", Symbol: sy, Price: price, Size: size}
+
+	s.CreateOrder(&o)
 
 }
