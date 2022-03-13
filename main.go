@@ -16,7 +16,7 @@ const (
 	secret     string = "49abfb79-4d9b-4435-9ded-ab691e734d66"
 )
 
-const dSize = "10"
+const dSize = "100"
 const dSymbol = "XLM-USDT"
 
 var currentPrice string
@@ -24,7 +24,10 @@ var currentPrice string
 var targetOperation string
 var targetPrice string
 
-var isTransaction bool
+var transactionExist bool = false
+var nextOperation string = "sell"
+
+var numberOfTransaction = 0
 
 func main() {
 
@@ -55,7 +58,9 @@ func checkOrder(s *kucoin.ApiService) {
 	as := kucoin.OrdersModel{}
 	resp.ReadData(&as)
 
-	log.Printf("length of the orders: %d", len(as))
+	transactionExist = len(as) != 0
+
+	log.Printf("length of the orders: %d", len(as) == 0)
 }
 
 func launchTicker(s *kucoin.ApiService) {
@@ -63,11 +68,25 @@ func launchTicker(s *kucoin.ApiService) {
 	ticker := time.NewTicker(5 * time.Second)
 	for _ = range ticker.C {
 		getPrice(s, dSymbol)
+		checkOrder(s)
+		if !transactionExist {
+			calculatePrice(nextOperation)
+
+			if nextOperation == "sell" {
+				sellCoin(s, "", targetPrice)
+			}
+
+			if nextOperation == "buy" {
+				buyCoin(s, "", targetPrice)
+			}
+
+			numberOfTransaction++
+		}
+
+		if numberOfTransaction == 5 {
+			ticker.Stop()
+		}
 	}
-
-}
-
-func calculateTarget() {
 
 }
 
@@ -92,10 +111,6 @@ func calculatePrice(side string) {
 
 }
 
-func stopTicker(t *time.Ticker) {
-	t.Stop()
-}
-
 func getPrice(s *kucoin.ApiService, symbol string) {
 	rsp, err := s.TickerLevel1(symbol)
 	if err != nil {
@@ -118,9 +133,18 @@ func buyCoin(s *kucoin.ApiService, sy string, price string) {
 
 	size := dSize
 
+	if sy == "" {
+		sy = dSymbol
+	}
+
 	o := kucoin.CreateOrderModel{ClientOid: uuid.New().String(), Side: "buy", Symbol: sy, Price: price, Size: size}
 
-	s.CreateOrder(&o)
+	_, err := s.CreateOrder(&o)
+
+	if err == nil {
+		fmt.Println("buy operation done")
+		nextOperation = "sell"
+	}
 
 }
 
@@ -128,8 +152,18 @@ func sellCoin(s *kucoin.ApiService, sy string, price string) {
 
 	size := dSize
 
+	if sy == "" {
+		sy = dSymbol
+	}
+
 	o := kucoin.CreateOrderModel{ClientOid: uuid.New().String(), Side: "sell", Symbol: sy, Price: price, Size: size}
 
-	s.CreateOrder(&o)
+	_, err := s.CreateOrder(&o)
+
+	if err == nil {
+
+		fmt.Println("sell operation done")
+		nextOperation = "buy"
+	}
 
 }
