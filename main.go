@@ -19,13 +19,16 @@ const (
 	secret     string = "49abfb79-4d9b-4435-9ded-ab691e734d66"
 )
 
-const dSize = "100"
-const dSymbol = "XLM-USDT"
+const dSize = "1"
+const dSymbol = "SOL-USDT"
 
+var avaragePrice string
 var currentPrice string
 
+var decimalPointNumber uint = 3
 var targetOperation string
 var targetPrice string
+var priceMargin float64 = 0.0035 //should be more than 0.002
 
 var transactionNotExists bool = false
 var nextOperation string = "sell"
@@ -55,7 +58,7 @@ func checkOrder(s *kucoin.ApiService) {
 
 	resp, err := s.Orders(params, &paginationParam)
 	if err != nil {
-		fmt.Println("Failed at orders")
+		log.Fatal(err)
 	}
 
 	as := kucoin.OrdersModel{}
@@ -71,7 +74,7 @@ func launchTicker(s *kucoin.ApiService) {
 
 	ticker := time.NewTicker(5 * time.Second)
 	for _ = range ticker.C {
-		getPrice(s, dSymbol)
+		getCurrentPrice(s, dSymbol)
 		checkOrder(s)
 
 		if transactionNotExists {
@@ -100,8 +103,8 @@ func calculatePrice(side string) {
 		if err != nil {
 			fmt.Println("error accured during parsing")
 		}
-		var p float64 = t + t*0.003
-		targetPrice = fmt.Sprint(utility.RoundFloat(p, 5))
+		var p float64 = t + t*priceMargin
+		targetPrice = fmt.Sprint(utility.RoundFloat(p, decimalPointNumber))
 	}
 
 	if side == "buy" {
@@ -109,26 +112,52 @@ func calculatePrice(side string) {
 		if err != nil {
 			fmt.Println("error accured during parsing")
 		}
-		var p float64 = t - t*0.0025
-		targetPrice = fmt.Sprint(utility.RoundFloat(p, 5))
+		var p float64 = t - t*priceMargin
+		targetPrice = fmt.Sprint(utility.RoundFloat(p, decimalPointNumber))
 	}
 
 }
 
-func getPrice(s *kucoin.ApiService, symbol string) {
-	rsp, err := s.TickerLevel1(symbol)
+func getAvarage24hPrice(s *kucoin.ApiService, symbol string) {
+	rsp, err := s.Stats24hr(symbol)
 	if err != nil {
 		fmt.Println("error in account")
 		return
 	}
 
-	as := kucoin.TickerLevel1Model{}
+	as := kucoin.Stats24hrModel{}
 	if err := rsp.ReadData(&as); err != nil {
 		fmt.Println("some error during reading")
 		return
 	}
 
-	currentPrice = as.Price
+	highestPrice, _ := strconv.ParseFloat(as.High, 64)
+	smallestPrice, _ := strconv.ParseFloat(as.Low, 64)
+
+	var calculatedPrice float64 = (smallestPrice + highestPrice) / 2
+
+	fmt.Printf("This is calculated price %+v \n", as)
+	fmt.Printf("This is calculated price %v", calculatedPrice)
+
+	avaragePrice = fmt.Sprintf("%v", calculatedPrice)
+
+}
+
+func getCurrentPrice(s *kucoin.ApiService, symbol string) {
+	rsp, err := s.Stats24hr(symbol)
+	if err != nil {
+		fmt.Println("error in account")
+		return
+	}
+
+	as := kucoin.Stats24hrModel{}
+	if err := rsp.ReadData(&as); err != nil {
+		fmt.Println("some error during reading")
+		return
+	}
+
+	currentPrice = as.Last
+
 }
 
 func buyCoin(s *kucoin.ApiService, sy string, price string) {
@@ -148,7 +177,7 @@ func buyCoin(s *kucoin.ApiService, sy string, price string) {
 	}
 
 	if err == nil {
-		fmt.Println("buy operation done")
+		fmt.Println("buy order is created")
 		nextOperation = "sell"
 	}
 
@@ -171,7 +200,7 @@ func sellCoin(s *kucoin.ApiService, sy string, price string) {
 	}
 
 	if err == nil {
-		fmt.Println("sell operation done")
+		fmt.Println("sell order is created")
 		nextOperation = "buy"
 	}
 
