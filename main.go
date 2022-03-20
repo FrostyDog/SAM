@@ -79,7 +79,7 @@ func launchTicker(s *kucoin.ApiService) {
 			numberOfTransaction++
 		}
 
-		if numberOfTransaction == 10 {
+		if numberOfTransaction == 40 {
 			ticker.Stop()
 			os.Exit(0)
 		}
