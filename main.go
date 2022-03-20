@@ -7,28 +7,18 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/FrostyDog/SAM/config"
 	"github.com/FrostyDog/SAM/utility"
 
 	"github.com/Kucoin/kucoin-go-sdk"
 	"github.com/google/uuid"
 )
 
-const (
-	api_key    string = "6212e60d29a7d50001efccd1"
-	passphrase string = "y9UU2JH9ZQUxgRjb1vHV8848DR1j17"
-	secret     string = "49abfb79-4d9b-4435-9ded-ab691e734d66"
-)
-
-const dSize = "1"
-const dSymbol = "SOL-USDT"
-
 var avaragePrice string
 var currentPrice string
 
-var decimalPointNumber uint = 3
 var targetOperation string
 var targetPrice string
-var priceMargin float64 = 0.0035 //should be more than 0.002
 
 var transactionNotExists bool = false
 var nextOperation string = "sell"
@@ -39,9 +29,9 @@ func main() {
 
 	s := kucoin.NewApiService(
 		kucoin.ApiBaseURIOption("https://api.kucoin.com"),
-		kucoin.ApiKeyOption(api_key),
-		kucoin.ApiSecretOption(secret),
-		kucoin.ApiPassPhraseOption(passphrase),
+		kucoin.ApiKeyOption(config.Api_key),
+		kucoin.ApiSecretOption(config.Secret),
+		kucoin.ApiPassPhraseOption(config.Passphrase),
 		kucoin.ApiKeyVersionOption(kucoin.ApiKeyVersionV2))
 
 	launchTicker(s)
@@ -74,7 +64,7 @@ func launchTicker(s *kucoin.ApiService) {
 
 	ticker := time.NewTicker(5 * time.Second)
 	for _ = range ticker.C {
-		getCurrentPrice(s, dSymbol)
+		getCurrentPrice(s, config.DSymbol)
 		checkOrder(s)
 
 		if transactionNotExists {
@@ -103,8 +93,8 @@ func calculatePrice(side string) {
 		if err != nil {
 			fmt.Println("error accured during parsing")
 		}
-		var p float64 = t + t*priceMargin
-		targetPrice = fmt.Sprint(utility.RoundFloat(p, decimalPointNumber))
+		var p float64 = t + t*config.PriceMargin
+		targetPrice = fmt.Sprint(utility.RoundFloat(p, config.DecimalPointNumber))
 	}
 
 	if side == "buy" {
@@ -112,8 +102,8 @@ func calculatePrice(side string) {
 		if err != nil {
 			fmt.Println("error accured during parsing")
 		}
-		var p float64 = t - t*priceMargin
-		targetPrice = fmt.Sprint(utility.RoundFloat(p, decimalPointNumber))
+		var p float64 = t - t*config.PriceMargin
+		targetPrice = fmt.Sprint(utility.RoundFloat(p, config.DecimalPointNumber))
 	}
 
 }
@@ -162,10 +152,10 @@ func getCurrentPrice(s *kucoin.ApiService, symbol string) {
 
 func buyCoin(s *kucoin.ApiService, sy string, price string) {
 
-	size := dSize
+	size := config.DSize
 
 	if sy == "" {
-		sy = dSymbol
+		sy = config.DSymbol
 	}
 
 	o := kucoin.CreateOrderModel{ClientOid: uuid.New().String(), Side: "buy", Symbol: sy, Price: price, Size: size}
@@ -185,10 +175,10 @@ func buyCoin(s *kucoin.ApiService, sy string, price string) {
 
 func sellCoin(s *kucoin.ApiService, sy string, price string) {
 
-	size := dSize
+	size := config.DSize
 
 	if sy == "" {
-		sy = dSymbol
+		sy = config.DSymbol
 	}
 
 	o := kucoin.CreateOrderModel{ClientOid: uuid.New().String(), Side: "sell", Symbol: sy, Price: price, Size: size}
