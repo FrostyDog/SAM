@@ -9,6 +9,6 @@ const (
 const (
 	DSize                      = "1"
 	DSymbol                    = "SOL-USDT"
-	PriceMargin        float64 = 0.0035 //should be more than 0.002
+	PriceMargin        float64 = 0.0045 //should be more than 0.002
 	DecimalPointNumber uint    = 3
 )
