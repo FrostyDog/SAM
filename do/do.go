@@ -78,7 +78,6 @@ func GetCorrelationPrice(s *kucoin.ApiService, symbol string) (correlactionPrice
 
 	var calculatedPrice float64 = (smallestPrice + highestPrice) / 2
 	var resPrice float64 = (calculatedPrice + currentPrice) / 2
-	fmt.Printf("This is calculated price %v", resPrice)
 
 	return fmt.Sprintf("%v", resPrice)
 
