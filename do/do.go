@@ -57,6 +57,33 @@ func CalculatePrice(side string, currentPrice string) (targetPrice string) {
 
 }
 
+// Median between 24h Median Price and Current price
+func GetCorrelationPrice(s *kucoin.ApiService, symbol string) (correlactionPrice string) {
+
+	rsp, err := s.Stats24hr(symbol)
+	if err != nil {
+		fmt.Println("error in account")
+		return
+	}
+
+	as := kucoin.Stats24hrModel{}
+	if err := rsp.ReadData(&as); err != nil {
+		fmt.Println("some error during reading")
+		return
+	}
+
+	highestPrice, _ := strconv.ParseFloat(as.High, 64)
+	smallestPrice, _ := strconv.ParseFloat(as.Low, 64)
+	currentPrice, _ := strconv.ParseFloat(as.Last, 64)
+
+	var calculatedPrice float64 = (smallestPrice + highestPrice) / 2
+	var resPrice float64 = (calculatedPrice + currentPrice) / 2
+	fmt.Printf("This is calculated price %v", resPrice)
+
+	return fmt.Sprintf("%v", resPrice)
+
+}
+
 func GetAvarage24hPrice(s *kucoin.ApiService, symbol string) (avaragePrice string) {
 	rsp, err := s.Stats24hr(symbol)
 	if err != nil {
@@ -79,6 +106,22 @@ func GetAvarage24hPrice(s *kucoin.ApiService, symbol string) (avaragePrice strin
 	fmt.Printf("This is calculated price %v", calculatedPrice)
 
 	return fmt.Sprintf("%v", calculatedPrice)
+}
+
+func Get24hStats(s *kucoin.ApiService, symbol string) (stats kucoin.Stats24hrModel) {
+	rsp, err := s.Stats24hr(symbol)
+	if err != nil {
+		fmt.Println("error in account")
+		return
+	}
+
+	as := kucoin.Stats24hrModel{}
+	if err := rsp.ReadData(&as); err != nil {
+		fmt.Println("some error during reading")
+		return
+	}
+
+	return as
 
 }
 

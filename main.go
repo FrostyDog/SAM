@@ -1,11 +1,14 @@
 package main
 
 import (
+	"fmt"
+
 	api "github.com/FrostyDog/SAM/API"
 	"github.com/FrostyDog/SAM/logic"
 )
 
 func main() {
+	fmt.Println("SAM is running")
 
-	logic.LaunchTicker(api.S)
+	logic.LaounchCorrelationTicker(api.S)
 }

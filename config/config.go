@@ -7,8 +7,20 @@ const (
 )
 
 const (
-	DSize                      = "1"
-	DSymbol                    = "SOL-USDT"
-	PriceMargin        float64 = 0.0045 //should be more than 0.002
-	DecimalPointNumber uint    = 3
+	DSize                   = "1"
+	DSymbol                 = "SOL-USDT"
+	DecimalPointNumber uint = 3
+	DPriceMargin            = 0.005
+	DChangeRate             = 0
 )
+
+var PriceMargin float64 = DPriceMargin //should be more than 0.002
+var ChangeRate float64 = DChangeRate
+
+func SetPriceMargin(newPrice float64) {
+	PriceMargin = newPrice
+}
+
+func SetChangeRate(newPrice float64) {
+	ChangeRate = newPrice
+}
