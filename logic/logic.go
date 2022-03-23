@@ -53,7 +53,7 @@ func LaounchCorrelationTicker(s *kucoin.ApiService) {
 
 	ticker := time.NewTicker(5 * time.Second)
 	for _ = range ticker.C {
-		currentPrice = do.GetCurrentPrice(api.S, config.DSymbol)
+		currentPrice = do.GetCorrelationPrice(api.S, config.DSymbol)
 		transactionNotExists = do.CheckOrder(api.S)
 
 		if transactionNotExists {
