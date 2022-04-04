@@ -2,6 +2,7 @@ package logic
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"os"
 	"strconv"
@@ -82,6 +83,10 @@ func LaounchCorrelationTicker(s *kucoin.ApiService) {
 // Tollerance with minimum margin on the fly model (Sell "by market")
 func LanchMarketToleranceTicker(s *kucoin.ApiService) {
 
+	logFile, _ := os.OpenFile("log.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	defer logFile.Close()
+	log.SetOutput(logFile)
+
 	var priceChangeList []float64
 	var priceOfStart float64
 	var toleranceIndicator float64 = 0.3 //0.3
@@ -112,20 +117,20 @@ func LanchMarketToleranceTicker(s *kucoin.ApiService) {
 		var canSell bool = currentChange <= toleranceThreshhold(maxChange, toleranceIndicator) && currentPrice > threshholdSell
 		var canBuy bool = currentChange >= toleranceThreshhold(minChange, toleranceIndicator) && currentPrice < threshholdBuy
 
-		fmt.Printf("Current price is %v and currentChange is %v \n", currentPrice, currentChange)
+		log.Printf("Current price is %v and currentChange is %v \n", currentPrice, currentChange)
 
 		if canSell && operationIndicator > 0 {
 			do.MarketOrder(api.S, "sell", config.DSymbol, tradeAmount)
 			priceChangeList = nil
 			priceOfStart = 0
-			fmt.Printf("Time to sell, current change: %v \n With Price Of start: %v and current is %v \n", currentChange, priceOfStart, currentPrice)
+			log.Printf("Time to sell, current change: %v \n With Price Of start: %v and current is %v \n", currentChange, priceOfStart, currentPrice)
 		}
 
 		if canBuy && operationIndicator < 2 {
 			do.MarketOrder(api.S, "buy", config.DSymbol, tradeAmount)
 			priceChangeList = nil
 			priceOfStart = 0
-			fmt.Printf("Time to buy, current change: %v \n With Price Of start: %v and current is %v \n", currentChange, priceOfStart, currentPrice)
+			log.Printf("Time to buy, current change: %v \n With Price Of start: %v and current is %v \n", currentChange, priceOfStart, currentPrice)
 		}
 
 	}

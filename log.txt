@@ -1,0 +1,11 @@
+2022/04/05 01:50:45 Current price is 132.195 and currentChange is 0 
+2022/04/05 01:50:46 Current price is 132.191 and currentChange is -0.004 
+2022/04/05 01:50:49 Current price is 132.191 and currentChange is -0.004 
+2022/04/05 01:50:50 Current price is 132.191 and currentChange is -0.004 
+2022/04/05 01:50:52 Current price is 132.199 and currentChange is 0.004 
+2022/04/05 01:50:54 Current price is 132.199 and currentChange is 0.004 
+2022/04/05 01:50:56 Current price is 132.199 and currentChange is 0.004 
+2022/04/05 01:50:58 Current price is 132.151 and currentChange is -0.044 
+2022/04/05 01:51:00 Current price is 132.151 and currentChange is -0.044 
+2022/04/05 01:51:16 Current price is 132.127 and currentChange is 0 
+2022/04/05 01:51:19 Current price is 132.127 and currentChange is 0 
