@@ -118,6 +118,7 @@ func LanchMarketToleranceTicker(s *kucoin.ApiService) {
 		var canBuy bool = currentChange >= toleranceThreshhold(minChange, toleranceIndicator) && currentPrice < threshholdBuy
 
 		log.Printf("Current price is %v and currentChange is %v \n", currentPrice, currentChange)
+		fmt.Printf("Current price is %v and currentChange is %v \n", currentPrice, currentChange)
 
 		if canSell && operationIndicator > 0 {
 			do.MarketOrder(api.S, "sell", config.DSymbol, tradeAmount)
