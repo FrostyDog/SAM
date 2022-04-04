@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func CheckOrder(s *kucoin.ApiService) bool {
+func OrderExists(s *kucoin.ApiService) bool {
 	var params = map[string]string{
 		"tradeType": "TRADE",
 		"status":    "active",
@@ -31,7 +31,7 @@ func CheckOrder(s *kucoin.ApiService) bool {
 		fmt.Println("Failed at reading pagination")
 	}
 
-	return len(as) == 0
+	return len(as) != 0
 }
 
 func CalculatePrice(side string, currentPrice string) (targetPrice string) {
@@ -178,5 +178,41 @@ func SellCoin(s *kucoin.ApiService, sy string, price string) (nextOperation stri
 
 	fmt.Println("sell order is created")
 	return "buy"
+}
 
+func MarketOrder(s *kucoin.ApiService, side string, sy string, size string) {
+
+	if size == "" {
+		size = config.DSize
+	}
+
+	if sy == "" {
+		sy = config.DSymbol
+	}
+
+	o := kucoin.CreateOrderModel{ClientOid: uuid.New().String(), Type: "market", Side: side, Symbol: sy, Size: size}
+
+	_, err := s.CreateOrder(&o)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func CurrencyHodlings(s *kucoin.ApiService, sy string) float64 {
+
+	var resp, err = s.Accounts("SOL", "")
+	if err != nil {
+		println("failed to fetch account info")
+	}
+
+	var info = kucoin.AccountsModel{}
+
+	if err := resp.ReadData(&info); err != nil {
+		fmt.Println("some error during reading")
+	}
+
+	v, _ := strconv.ParseFloat(info[0].Available, 64)
+
+	return utility.RoundFloat(v, 3)
 }
