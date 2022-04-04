@@ -116,17 +116,15 @@ func LanchMarketToleranceTicker(s *kucoin.ApiService) {
 
 		if canSell && operationIndicator > 0 {
 			do.MarketOrder(api.S, "sell", config.DSymbol, tradeAmount)
-			operationIndicator--
-			priceOfStart = currentPrice
 			priceChangeList = nil
+			priceOfStart = 0
 			fmt.Printf("Time to sell, current change: %v \n With Price Of start: %v and current is %v \n", currentChange, priceOfStart, currentPrice)
 		}
 
 		if canBuy && operationIndicator < 2 {
 			do.MarketOrder(api.S, "buy", config.DSymbol, tradeAmount)
-			operationIndicator++
-			priceOfStart = currentPrice
 			priceChangeList = nil
+			priceOfStart = 0
 			fmt.Printf("Time to buy, current change: %v \n With Price Of start: %v and current is %v \n", currentChange, priceOfStart, currentPrice)
 		}
 
