@@ -95,7 +95,7 @@ func LanchMarketToleranceTicker(s *kucoin.ApiService) {
 	var threshholdBuy float64        //priceOfStart - 0.003 * priceOfStart
 	var threshholdSell float64       //priceOfStart + 0.003 * priceOfStart
 	var operationIndicator int64 = 0 // -2 or +2
-	var tradeAmount string = fmt.Sprintf("%v", 0.5)
+	var tradeAmount string = fmt.Sprintf("%v", 1)
 
 	ticker := time.NewTicker(2 * time.Second)
 	for _ = range ticker.C {
