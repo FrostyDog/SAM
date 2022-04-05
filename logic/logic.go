@@ -117,7 +117,6 @@ func LanchMarketToleranceTicker(s *kucoin.ApiService) {
 		var canSell bool = currentChange <= toleranceThreshhold(maxChange, toleranceIndicator) && currentPrice > threshholdSell
 		var canBuy bool = currentChange >= toleranceThreshhold(minChange, toleranceIndicator) && currentPrice < threshholdBuy
 
-		log.Printf("Current price is %v and currentChange is %v \n", currentPrice, currentChange)
 		fmt.Printf("Current price is %v and currentChange is %v \n", currentPrice, currentChange)
 
 		if canSell && operationIndicator > 0 {
@@ -125,6 +124,7 @@ func LanchMarketToleranceTicker(s *kucoin.ApiService) {
 			priceChangeList = nil
 			priceOfStart = 0
 			log.Printf("Time to sell, current change: %v \n With Price Of start: %v and current is %v \n", currentChange, priceOfStart, currentPrice)
+			fmt.Printf("Time to sell, current change: %v \n With Price Of start: %v and current is %v \n", currentChange, priceOfStart, currentPrice)
 		}
 
 		if canBuy && operationIndicator < 2 {
@@ -132,6 +132,7 @@ func LanchMarketToleranceTicker(s *kucoin.ApiService) {
 			priceChangeList = nil
 			priceOfStart = 0
 			log.Printf("Time to buy, current change: %v \n With Price Of start: %v and current is %v \n", currentChange, priceOfStart, currentPrice)
+			fmt.Printf("Time to sell, current change: %v \n With Price Of start: %v and current is %v \n", currentChange, priceOfStart, currentPrice)
 		}
 
 	}
