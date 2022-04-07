@@ -4,11 +4,12 @@ import (
 	"fmt"
 
 	api "github.com/FrostyDog/SAM/API"
-	logic "github.com/FrostyDog/SAM/logic/market_tolerance"
+	"github.com/FrostyDog/SAM/config"
+	logic "github.com/FrostyDog/SAM/logic/market_tolerance_ticker"
 )
 
 func main() {
 	fmt.Println("SAM is running")
 
-	logic.LaunchMarketToleranceTicker(api.S)
+	logic.LaunchMarketToleranceTicker(api.S, config.PrimarySymbol, config.TradingPair, config.PriceMargin)
 }

@@ -5,7 +5,6 @@ import (
 	"time"
 
 	api "github.com/FrostyDog/SAM/API"
-	"github.com/FrostyDog/SAM/config"
 	"github.com/FrostyDog/SAM/do"
 
 	"github.com/Kucoin/kucoin-go-sdk"
@@ -22,11 +21,11 @@ var nextOperation string = "sell"
 var numberOfTransaction = 0
 
 // Takes current price as the base, and form selling/buying from it.
-func LaunchBasicTicker(s *kucoin.ApiService) {
+func LaunchBasicTicker(s *kucoin.ApiService, tradingPair string) {
 
 	ticker := time.NewTicker(5 * time.Second)
 	for _ = range ticker.C {
-		currentPrice = do.GetCurrentPrice(api.S, config.DSymbol)
+		currentPrice = do.GetCurrentPrice(api.S, tradingPair)
 		transactionNotExists = !do.OrderExists(api.S)
 
 		if transactionNotExists {
@@ -49,11 +48,11 @@ func LaunchBasicTicker(s *kucoin.ApiService) {
 }
 
 // Takes correlactionPrice as a base
-func LaounchCorrelationTicker(s *kucoin.ApiService) {
+func LaounchCorrelationTicker(s *kucoin.ApiService, tradingPair string) {
 
 	ticker := time.NewTicker(5 * time.Second)
 	for _ = range ticker.C {
-		currentPrice = do.GetCorrelationPrice(api.S, config.DSymbol)
+		currentPrice = do.GetCorrelationPrice(api.S, tradingPair)
 		transactionNotExists = !do.OrderExists(api.S)
 
 		if transactionNotExists {
@@ -72,5 +71,4 @@ func LaounchCorrelationTicker(s *kucoin.ApiService) {
 			os.Exit(0)
 		}
 	}
-
 }

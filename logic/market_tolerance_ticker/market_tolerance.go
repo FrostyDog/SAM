@@ -9,7 +9,6 @@ import (
 	"time"
 
 	api "github.com/FrostyDog/SAM/API"
-	"github.com/FrostyDog/SAM/config"
 	"github.com/FrostyDog/SAM/do"
 	"github.com/FrostyDog/SAM/utility"
 
@@ -17,7 +16,7 @@ import (
 )
 
 // Tollerance with minimum margin on the fly model (Sell "by market")
-func LaunchMarketToleranceTicker(s *kucoin.ApiService) {
+func LaunchMarketToleranceTicker(s *kucoin.ApiService, currency string, tradingPair string, priceMargin float64) {
 
 	logFile, _ := os.OpenFile("log.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	defer logFile.Close()
@@ -35,14 +34,14 @@ func LaunchMarketToleranceTicker(s *kucoin.ApiService) {
 
 	ticker := time.NewTicker(2 * time.Second) // usually 2 * time.Second --- 10 is for debuging
 	for _ = range ticker.C {
-		priceInString := do.GetCurrentPrice(api.S, config.DSymbol)
+		priceInString := do.GetCurrentPrice(api.S, tradingPair)
 		currentPrice, _ := strconv.ParseFloat(priceInString, 64)
 
-		operationIndicator = calculateCapability(do.CurrencyHodlings(api.S, "SOL"), tradeAmount)
+		operationIndicator = calculateCapability(do.CurrencyHodlings(api.S, currency), tradeAmount)
 		if priceOfStart == 0 {
 			priceOfStart = currentPrice
-			threshholdSell = utility.RoundFloat(priceOfStart+0.004*priceOfStart, 3)
-			threshholdBuy = utility.RoundFloat(priceOfStart-0.004*priceOfStart, 3)
+			threshholdSell = utility.RoundFloat(priceOfStart+priceMargin*priceOfStart, 3)
+			threshholdBuy = utility.RoundFloat(priceOfStart-priceMargin*priceOfStart, 3)
 		}
 
 		currentChange := utility.RoundFloat(currentPrice-priceOfStart, 3)
@@ -55,12 +54,12 @@ func LaunchMarketToleranceTicker(s *kucoin.ApiService) {
 
 		fmt.Printf("Current price is %v and currentChange is %v \n", currentPrice, currentChange)
 
-		// For debug
+		// For debug uncomment to track all varialbes
 		// log.Printf("Current price is %v  -- Current Change: %v \n ThreshholdSell %v, -- ThreshholdBuy: %v \n Max Tollerance: %v -- MinTollerance: %v, \n\n",
 		// 	currentPrice, currentChange, threshholdSell, threshholdBuy, toleranceThreshhold(maxChange, toleranceIndicator), toleranceThreshhold(minChange, toleranceIndicator))
 
 		if canSell && operationIndicator > 0 {
-			do.MarketOrder(api.S, "sell", config.DSymbol, tradeAmount)
+			do.MarketOrder(api.S, "sell", tradingPair, tradeAmount)
 			priceChangeList = nil
 			priceOfStart = 0
 			log.Printf("Time to sell, current change: %v \n With Price Of start: %v and current is %v \n", currentChange, priceOfStart, currentPrice)
@@ -68,7 +67,7 @@ func LaunchMarketToleranceTicker(s *kucoin.ApiService) {
 		}
 
 		if canBuy && operationIndicator < 3 {
-			do.MarketOrder(api.S, "buy", config.DSymbol, tradeAmount)
+			do.MarketOrder(api.S, "buy", tradingPair, tradeAmount)
 			priceChangeList = nil
 			priceOfStart = 0
 			log.Printf("Time to buy, current change: %v \n With Price Of start: %v and current is %v \n", currentChange, priceOfStart, currentPrice)

@@ -143,10 +143,10 @@ func GetCurrentPrice(s *kucoin.ApiService, symbol string) (currentPrice string) 
 
 func BuyCoin(s *kucoin.ApiService, sy string, price string) (nextOperation string) {
 
-	size := config.DSize
+	size := config.Size
 
 	if sy == "" {
-		sy = config.DSymbol
+		sy = config.TradingPair
 	}
 
 	o := kucoin.CreateOrderModel{ClientOid: uuid.New().String(), Side: "buy", Symbol: sy, Price: price, Size: size}
@@ -162,10 +162,10 @@ func BuyCoin(s *kucoin.ApiService, sy string, price string) (nextOperation strin
 
 func SellCoin(s *kucoin.ApiService, sy string, price string) (nextOperation string) {
 
-	size := config.DSize
+	size := config.Size
 
 	if sy == "" {
-		sy = config.DSymbol
+		sy = config.TradingPair
 	}
 
 	o := kucoin.CreateOrderModel{ClientOid: uuid.New().String(), Side: "sell", Symbol: sy, Price: price, Size: size}
@@ -183,11 +183,11 @@ func SellCoin(s *kucoin.ApiService, sy string, price string) (nextOperation stri
 func MarketOrder(s *kucoin.ApiService, side string, sy string, size string) {
 
 	if size == "" {
-		size = config.DSize
+		size = config.Size
 	}
 
 	if sy == "" {
-		sy = config.DSymbol
+		sy = config.TradingPair
 	}
 
 	o := kucoin.CreateOrderModel{ClientOid: uuid.New().String(), Type: "market", Side: side, Symbol: sy, Size: size}
