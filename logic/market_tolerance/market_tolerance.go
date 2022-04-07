@@ -60,7 +60,7 @@ func LaunchMarketToleranceTicker(s *kucoin.ApiService) {
 		// 	currentPrice, currentChange, threshholdSell, threshholdBuy, toleranceThreshhold(maxChange, toleranceIndicator), toleranceThreshhold(minChange, toleranceIndicator))
 
 		if canSell && operationIndicator > 0 {
-			// do.MarketOrder(api.S, "sell", config.DSymbol, tradeAmount)
+			do.MarketOrder(api.S, "sell", config.DSymbol, tradeAmount)
 			priceChangeList = nil
 			priceOfStart = 0
 			log.Printf("Time to sell, current change: %v \n With Price Of start: %v and current is %v \n", currentChange, priceOfStart, currentPrice)
@@ -68,7 +68,7 @@ func LaunchMarketToleranceTicker(s *kucoin.ApiService) {
 		}
 
 		if canBuy && operationIndicator < 3 {
-			// do.MarketOrder(api.S, "buy", config.DSymbol, tradeAmount)
+			do.MarketOrder(api.S, "buy", config.DSymbol, tradeAmount)
 			priceChangeList = nil
 			priceOfStart = 0
 			log.Printf("Time to buy, current change: %v \n With Price Of start: %v and current is %v \n", currentChange, priceOfStart, currentPrice)
