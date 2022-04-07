@@ -201,7 +201,7 @@ func MarketOrder(s *kucoin.ApiService, side string, sy string, size string) {
 
 func CurrencyHodlings(s *kucoin.ApiService, sy string) float64 {
 
-	var resp, err = s.Accounts("SOL", "")
+	var resp, err = s.Accounts(sy, "")
 	if err != nil {
 		println("failed to fetch account info")
 	}
