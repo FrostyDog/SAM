@@ -75,7 +75,7 @@ func LaunchMarketToleranceTicker(s *kucoin.ApiService, primarySymbol string, sec
 			priceChangeList = nil
 			priceOfStart = 0
 			log.Printf("Time to buy, current change: %v \n With Price Of start: %v and current is %v \n", currentChange, priceOfStart, currentPrice)
-			fmt.Printf("Time to sell, current change: %v \n With Price Of start: %v and current is %v \n", currentChange, priceOfStart, currentPrice)
+			fmt.Printf("Time to buy, current change: %v \n With Price Of start: %v and current is %v \n", currentChange, priceOfStart, currentPrice)
 		}
 
 	}
