@@ -16,26 +16,31 @@ import (
 )
 
 // Tollerance with minimum margin on the fly model (Sell "by market")
-func LaunchMarketToleranceTicker(s *kucoin.ApiService, primarySymbol string, secondarySymbol string, priceMargin float64) {
-
-	var tradingPair string = primarySymbol + "-" + secondarySymbol
+func LaunchMarketToleranceTicker(s *kucoin.ApiService, primarySymbol string, secondarySymbol string, priceMargin float64, entryPrice float64) {
 
 	logFile, _ := os.OpenFile("log.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	defer logFile.Close()
 	log.SetOutput(logFile)
 
+	var tradingPair string = primarySymbol + "-" + secondarySymbol
 	var priceChangeList []float64
-	var priceOfStart float64
+	var startPrice float64
 	var toleranceIndicator float64 = 0.3 //0.3
 	var maxChange float64
 	var minChange float64
-	var threshholdBuy float64  //priceOfStart - PriceMargin * priceOfStart
-	var threshholdSell float64 //priceOfStart + PriceMargin * priceOfStart
+	var thresholdBuy float64  //startPrice - PriceMargin * startPrice
+	var thresholdSell float64 //startPrice + PriceMargin * startPrice
 	var primaryCapability int64
 	var secondaryCapability int64
 	var tradeAmount string = fmt.Sprintf("%v", 1)
 
 	ticker := time.NewTicker(2 * time.Second)
+
+	// Execute entryPrice logic only once before the ticket --- config phase
+	if entryPrice != 0 {
+		startPrice = entryPrice
+		thresholdSell, thresholdBuy = calcPriceThresholds(startPrice, priceMargin)
+	}
 
 	for _ = range ticker.C {
 		priceInString := do.GetCurrentPrice(api.S, tradingPair)
@@ -44,40 +49,39 @@ func LaunchMarketToleranceTicker(s *kucoin.ApiService, primarySymbol string, sec
 		primaryCapability = calcPrimaryCapability(do.CurrencyHodlings(api.S, primarySymbol), tradeAmount)
 		secondaryCapability = calcSecondaryCapability(do.CurrencyHodlings(api.S, secondarySymbol), currentPrice)
 
-		if priceOfStart == 0 {
-			priceOfStart = currentPrice
-			threshholdSell = utility.RoundFloat(priceOfStart+priceMargin*priceOfStart, 3)
-			threshholdBuy = utility.RoundFloat(priceOfStart-priceMargin*priceOfStart, 3)
+		if startPrice == 0 {
+			startPrice = currentPrice
+			thresholdSell, thresholdBuy = calcPriceThresholds(startPrice, priceMargin)
 		}
 
-		currentChange := utility.RoundFloat(currentPrice-priceOfStart, 3)
+		currentChange := utility.RoundFloat(currentPrice-startPrice, 3)
 
 		priceChangeList = append(priceChangeList, currentChange)
 		minChange, maxChange = utility.MinMax(priceChangeList)
 
-		var canSell bool = currentChange <= toleranceThreshhold(maxChange, toleranceIndicator) && currentPrice > threshholdSell
-		var canBuy bool = currentChange >= toleranceThreshhold(minChange, toleranceIndicator) && currentPrice < threshholdBuy
+		var canSell bool = currentChange <= toleranceThreshhold(maxChange, toleranceIndicator) && currentPrice > thresholdSell
+		var canBuy bool = currentChange >= toleranceThreshhold(minChange, toleranceIndicator) && currentPrice < thresholdBuy
 
 		fmt.Printf("Current price is %v and currentChange is %v \n", currentPrice, currentChange)
 
 		// For debug uncomment to track all varialbes
-		// log.Printf("Current price is %v  -- Current Change: %v \n ThreshholdSell %v, -- ThreshholdBuy: %v \n Max Tollerance: %v -- MinTollerance: %v, \n\n",
-		// 	currentPrice, currentChange, threshholdSell, threshholdBuy, toleranceThreshhold(maxChange, toleranceIndicator), toleranceThreshhold(minChange, toleranceIndicator))
+		// log.Printf("Current price is %v  -- Current Change: %v \n thresholdSell %v, -- thresholdBuy: %v \n Max Tollerance: %v -- MinTollerance: %v, \n\n",
+		// 	currentPrice, currentChange, thresholdSell, thresholdBuy, toleranceThreshhold(maxChange, toleranceIndicator), toleranceThreshhold(minChange, toleranceIndicator))
 
 		if canSell && primaryCapability > 0 {
 			do.MarketOrder(api.S, "sell", tradingPair, tradeAmount)
 			priceChangeList = nil
-			priceOfStart = 0
-			log.Printf("Time to sell, current change: %v \n With Price Of start: %v and current is %v \n", currentChange, priceOfStart, currentPrice)
-			fmt.Printf("Time to sell, current change: %v \n With Price Of start: %v and current is %v \n", currentChange, priceOfStart, currentPrice)
+			startPrice = 0
+			log.Printf("Time to sell, current change: %v \n With Price Of start: %v and current is %v \n", currentChange, startPrice, currentPrice)
+			fmt.Printf("Time to sell, current change: %v \n With Price Of start: %v and current is %v \n", currentChange, startPrice, currentPrice)
 		}
 
 		if canBuy && secondaryCapability > 0 {
 			do.MarketOrder(api.S, "buy", tradingPair, tradeAmount)
 			priceChangeList = nil
-			priceOfStart = 0
-			log.Printf("Time to buy, current change: %v \n With Price Of start: %v and current is %v \n", currentChange, priceOfStart, currentPrice)
-			fmt.Printf("Time to buy, current change: %v \n With Price Of start: %v and current is %v \n", currentChange, priceOfStart, currentPrice)
+			startPrice = 0
+			log.Printf("Time to buy, current change: %v \n With Price Of start: %v and current is %v \n", currentChange, startPrice, currentPrice)
+			fmt.Printf("Time to buy, current change: %v \n With Price Of start: %v and current is %v \n", currentChange, startPrice, currentPrice)
 		}
 
 	}
@@ -99,4 +103,10 @@ func calcPrimaryCapability(avaliable float64, tradeAmount string) int64 {
 func calcSecondaryCapability(avaliable float64, currentPrice float64) int64 {
 	ans := avaliable / currentPrice
 	return int64(math.Floor(ans))
+}
+
+func calcPriceThresholds(price float64, margin float64) (sell float64, buy float64) {
+	sell = utility.RoundFloat(price+margin*price, 3)
+	buy = utility.RoundFloat(price-margin*price, 3)
+	return sell, buy
 }
