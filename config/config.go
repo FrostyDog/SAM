@@ -8,7 +8,6 @@ const (
 
 const (
 	Size                    = "1"
-	TradingPair             = "SOL-USDT"
 	PrimarySymbol           = "SOL"
 	SecondarySymbol         = "USDT"
 	DecimalPointNumber uint = 3
@@ -16,6 +15,7 @@ const (
 	DChangeRate             = 0
 )
 
+var TradingPair string = PrimarySymbol + "-" + SecondarySymbol
 var PriceMargin float64 = DPriceMargin //should be more than 0.002
 var ChangeRate float64 = DChangeRate
 

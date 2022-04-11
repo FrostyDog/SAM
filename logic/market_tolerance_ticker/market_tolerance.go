@@ -16,7 +16,9 @@ import (
 )
 
 // Tollerance with minimum margin on the fly model (Sell "by market")
-func LaunchMarketToleranceTicker(s *kucoin.ApiService, primarySymbol string, secondarySymbol string, tradingPair string, priceMargin float64) {
+func LaunchMarketToleranceTicker(s *kucoin.ApiService, primarySymbol string, secondarySymbol string, priceMargin float64) {
+
+	var tradingPair string = primarySymbol + "-" + secondarySymbol
 
 	logFile, _ := os.OpenFile("log.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	defer logFile.Close()
