@@ -102,7 +102,8 @@ func calcPrimaryCapability(avaliable float64, tradeAmount string) int64 {
 
 // calculates capability based current Price (ability to buy --- floored to whole number)
 func calcSecondaryCapability(avaliable float64, currentPrice float64) int64 {
-	ans := avaliable / currentPrice
+	tradingAmount, _ := strconv.ParseFloat(config.TradingSize, 64)
+	ans := avaliable / currentPrice / tradingAmount
 	return int64(math.Floor(ans))
 }
 
