@@ -115,16 +115,16 @@ func calcPriceThresholds(price float64, margin float64) (sell float64, buy float
 
 func canSell(currentChange float64, maxChange float64, tolerance float64, currentPrice float64, startPrice float64, thresholdSell float64) bool {
 	res := currentChange <= toleranceThreshhold(maxChange, tolerance) && currentPrice > thresholdSell
-	_, rapidDrop := isRapidChange(startPrice, currentPrice)
+	rapidRise, _ := isRapidChange(startPrice, currentPrice)
 
-	return res || rapidDrop
+	return res || rapidRise
 }
 
 func canBuy(currentChange float64, minChange float64, tolerance float64, currentPrice float64, startPrice float64, thresholdBuy float64) bool {
 	res := currentChange >= toleranceThreshhold(minChange, tolerance) && currentPrice < thresholdBuy
-	rapidRise, _ := isRapidChange(startPrice, currentPrice)
+	_, rapidDrop := isRapidChange(startPrice, currentPrice)
 
-	return res || rapidRise
+	return res || rapidDrop
 }
 
 // If change was more than 3% or -3% === do the oposite action to correct the flow to balance the capabilities
