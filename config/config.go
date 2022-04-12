@@ -11,7 +11,7 @@ const (
 	PrimarySymbol           = "SOL"
 	SecondarySymbol         = "USDT"
 	DecimalPointNumber uint = 3
-	DPriceMargin            = 0.008
+	DPriceMargin            = 0.007
 	DChangeRate             = 0
 )
 

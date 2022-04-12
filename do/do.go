@@ -203,7 +203,11 @@ func CurrencyHodlings(s *kucoin.ApiService, sy string) float64 {
 
 	var resp, err = s.Accounts(sy, "")
 	if err != nil {
-		println("failed to fetch account info")
+		println("failed to fetch account info - trying again")
+		resp, err = s.Accounts(sy, "")
+		if (err) != nil {
+			println("failed again after re-trying")
+		}
 	}
 
 	var info = kucoin.AccountsModel{}

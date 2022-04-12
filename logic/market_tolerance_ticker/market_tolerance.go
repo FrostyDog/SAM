@@ -126,7 +126,7 @@ func canBuy(currentChange float64, minChange float64, tolerance float64, current
 	return res || rapidRise
 }
 
-// If change was more than 3% or -3% === do the oposite action to correct the flow
+// If change was more than 3% or -3% === do the oposite action to correct the flow to balance the capabilities
 func isRapidChange(startPrice float64, currentPrice float64) (rapidRise bool, rapidDrop bool) {
 	changePersantage := (currentPrice - startPrice) / startPrice * 100
 	rapidRise = changePersantage >= 3
