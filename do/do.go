@@ -143,7 +143,7 @@ func GetCurrentPrice(s *kucoin.ApiService, symbol string) (currentPrice string) 
 
 func BuyCoin(s *kucoin.ApiService, sy string, price string) (nextOperation string) {
 
-	size := config.Size
+	size := config.TradingSize
 
 	if sy == "" {
 		sy = config.TradingPair
@@ -162,7 +162,7 @@ func BuyCoin(s *kucoin.ApiService, sy string, price string) (nextOperation strin
 
 func SellCoin(s *kucoin.ApiService, sy string, price string) (nextOperation string) {
 
-	size := config.Size
+	size := config.TradingSize
 
 	if sy == "" {
 		sy = config.TradingPair
@@ -183,7 +183,7 @@ func SellCoin(s *kucoin.ApiService, sy string, price string) (nextOperation stri
 func MarketOrder(s *kucoin.ApiService, side string, sy string, size string) {
 
 	if size == "" {
-		size = config.Size
+		size = config.TradingSize
 	}
 
 	if sy == "" {

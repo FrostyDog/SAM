@@ -9,6 +9,7 @@ import (
 	"time"
 
 	api "github.com/FrostyDog/SAM/API"
+	"github.com/FrostyDog/SAM/config"
 	"github.com/FrostyDog/SAM/do"
 	"github.com/FrostyDog/SAM/utility"
 
@@ -32,7 +33,7 @@ func LaunchMarketToleranceTicker(s *kucoin.ApiService, primarySymbol string, sec
 	var thresholdSell float64 //startPrice + PriceMargin * startPrice
 	var primaryCapability int64
 	var secondaryCapability int64
-	var tradeAmount string = fmt.Sprintf("%v", 1)
+	var tradeAmount string = config.TradingSize
 
 	ticker := time.NewTicker(2 * time.Second)
 
@@ -59,8 +60,8 @@ func LaunchMarketToleranceTicker(s *kucoin.ApiService, primarySymbol string, sec
 		priceChangeList = append(priceChangeList, currentChange)
 		minChange, maxChange = utility.MinMax(priceChangeList)
 
-		var canSell bool = currentChange <= toleranceThreshhold(maxChange, toleranceIndicator) && currentPrice > thresholdSell
-		var canBuy bool = currentChange >= toleranceThreshhold(minChange, toleranceIndicator) && currentPrice < thresholdBuy
+		var canSell bool = canSell(currentChange, maxChange, toleranceIndicator, currentPrice, startPrice, thresholdSell)
+		var canBuy bool = canBuy(currentChange, minChange, toleranceIndicator, currentPrice, startPrice, thresholdBuy)
 
 		fmt.Printf("Current price is %v and currentChange is %v \n", currentPrice, currentChange)
 
@@ -109,4 +110,26 @@ func calcPriceThresholds(price float64, margin float64) (sell float64, buy float
 	sell = utility.RoundFloat(price+margin*price, 3)
 	buy = utility.RoundFloat(price-margin*price, 3)
 	return sell, buy
+}
+
+func canSell(currentChange float64, maxChange float64, tolerance float64, currentPrice float64, startPrice float64, thresholdSell float64) bool {
+	res := currentChange <= toleranceThreshhold(maxChange, tolerance) && currentPrice > thresholdSell
+	_, rapidDrop := isRapidChange(startPrice, currentPrice)
+
+	return res || rapidDrop
+}
+
+func canBuy(currentChange float64, minChange float64, tolerance float64, currentPrice float64, startPrice float64, thresholdBuy float64) bool {
+	res := currentChange >= toleranceThreshhold(minChange, tolerance) && currentPrice < thresholdBuy
+	rapidRise, _ := isRapidChange(startPrice, currentPrice)
+
+	return res || rapidRise
+}
+
+// If change was more than 3% or -3% === do the oposite action to correct the flow
+func isRapidChange(startPrice float64, currentPrice float64) (rapidRise bool, rapidDrop bool) {
+	changePersantage := (currentPrice - startPrice) / startPrice * 100
+	rapidRise = changePersantage >= 3
+	rapidDrop = changePersantage <= -3
+	return rapidRise, rapidDrop
 }

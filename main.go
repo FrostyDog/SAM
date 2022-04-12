@@ -10,6 +10,5 @@ import (
 
 func main() {
 	fmt.Println("SAM is running")
-
 	logic.LaunchMarketToleranceTicker(api.S, config.PrimarySymbol, config.SecondarySymbol, config.PriceMargin, 0)
 }

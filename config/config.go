@@ -7,11 +7,11 @@ const (
 )
 
 const (
-	Size                    = "1"
+	TradingSize             = "0.5"
 	PrimarySymbol           = "SOL"
 	SecondarySymbol         = "USDT"
 	DecimalPointNumber uint = 3
-	DPriceMargin            = 0.006
+	DPriceMargin            = 0.008
 	DChangeRate             = 0
 )
 
