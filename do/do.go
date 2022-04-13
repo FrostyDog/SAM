@@ -199,24 +199,20 @@ func MarketOrder(s *kucoin.ApiService, side string, sy string, size string) {
 	}
 }
 
-func CurrencyHodlings(s *kucoin.ApiService, sy string) float64 {
+func CurrencyHodlings(s *kucoin.ApiService, sy string) (float64, error) {
 
 	var resp, err = s.Accounts(sy, "")
 	if err != nil {
-		println("failed to fetch account info - trying again")
-		resp, err = s.Accounts(sy, "")
-		if (err) != nil {
-			println("failed again after re-trying")
-		}
+		log.Printf("Error in accounts %v", err)
+		return
 	}
-
 	var info = kucoin.AccountsModel{}
 
 	if err := resp.ReadData(&info); err != nil {
-		fmt.Println("some error during reading")
+		log.Printf("Error in reading accounts %v", err)
 	}
 
-	v, _ := strconv.ParseFloat(info[0].Available, 64)
+	v, err := strconv.ParseFloat(info[0].Available, 64)
 
-	return utility.RoundFloat(v, 3)
+	return utility.RoundFloat(v, 3), err
 }

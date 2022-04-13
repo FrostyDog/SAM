@@ -47,8 +47,19 @@ func LaunchMarketToleranceTicker(s *kucoin.ApiService, primarySymbol string, sec
 		priceInString := do.GetCurrentPrice(api.S, tradingPair)
 		currentPrice, _ := strconv.ParseFloat(priceInString, 64)
 
-		primaryCapability = calcPrimaryCapability(do.CurrencyHodlings(api.S, primarySymbol), tradeAmount)
-		secondaryCapability = calcSecondaryCapability(do.CurrencyHodlings(api.S, secondarySymbol), currentPrice)
+		primaryHoldings, err := do.CurrencyHodlings(api.S, primarySymbol)
+		if err != nil {
+			log.Println("Failed at primary holding - retrying")
+			primaryHoldings, _ = do.CurrencyHodlings(api.S, primarySymbol)
+		}
+		secondaryHoldings, err := do.CurrencyHodlings(api.S, secondarySymbol)
+		if err != nil {
+			log.Println("Failed at secondary holding - retrying")
+			secondaryHoldings, _ = do.CurrencyHodlings(api.S, secondarySymbol)
+		}
+
+		primaryCapability = calcPrimaryCapability(primaryHoldings, tradeAmount)
+		secondaryCapability = calcSecondaryCapability(secondaryHoldings, currentPrice)
 
 		if startPrice == 0 {
 			startPrice = currentPrice
