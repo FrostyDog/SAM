@@ -204,7 +204,6 @@ func CurrencyHodlings(s *kucoin.ApiService, sy string) (float64, error) {
 	var resp, err = s.Accounts(sy, "")
 	if err != nil {
 		log.Printf("Error in accounts %v", err)
-		return
 	}
 	var info = kucoin.AccountsModel{}
 
