@@ -49,13 +49,11 @@ func LaunchMarketToleranceTicker(s *kucoin.ApiService, primarySymbol string, sec
 
 		primaryHoldings, err := do.CurrencyHodlings(api.S, primarySymbol)
 		if err != nil {
-			log.Println("Failed at primary holding - retrying")
-			primaryHoldings, _ = do.CurrencyHodlings(api.S, primarySymbol)
+			log.Println("Finally Failed at primary holding")
 		}
 		secondaryHoldings, err := do.CurrencyHodlings(api.S, secondarySymbol)
 		if err != nil {
-			log.Println("Failed at secondary holding - retrying")
-			secondaryHoldings, _ = do.CurrencyHodlings(api.S, secondarySymbol)
+			log.Println("Finally Failed at secondary holding")
 		}
 
 		primaryCapability = calcPrimaryCapability(primaryHoldings, tradeAmount)

@@ -125,10 +125,17 @@ func Get24hStats(s *kucoin.ApiService, symbol string) (stats kucoin.Stats24hrMod
 }
 
 func GetCurrentPrice(s *kucoin.ApiService, symbol string) (currentPrice string) {
-	rsp, err := s.Stats24hr(symbol)
-	if err != nil {
-		fmt.Println("error in account")
-		return
+
+	var rsp *kucoin.ApiResponse
+	var err error
+
+	for {
+		rsp, err = s.Stats24hr(symbol)
+		if err == nil {
+			break
+		} else {
+			log.Printf("[Retrying] Error in getting Stats %v", err)
+		}
 	}
 
 	as := kucoin.Stats24hrModel{}
@@ -201,10 +208,18 @@ func MarketOrder(s *kucoin.ApiService, side string, sy string, size string) {
 
 func CurrencyHodlings(s *kucoin.ApiService, sy string) (float64, error) {
 
-	var resp, err = s.Accounts(sy, "")
-	if err != nil {
-		log.Printf("Error in accounts %v", err)
+	var resp *kucoin.ApiResponse
+	var err error
+
+	for {
+		resp, err = s.Accounts(sy, "")
+		if err == nil {
+			break
+		} else {
+			log.Printf("[Retrying] Error in accounts %v", err)
+		}
 	}
+
 	var info = kucoin.AccountsModel{}
 
 	if err := resp.ReadData(&info); err != nil {
