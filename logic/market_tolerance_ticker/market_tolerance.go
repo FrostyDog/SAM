@@ -78,20 +78,26 @@ func LaunchMarketToleranceTicker(s *kucoin.ApiService, primarySymbol string, sec
 		// log.Printf("Current price is %v  -- Current Change: %v \n thresholdSell %v, -- thresholdBuy: %v \n Max Tollerance: %v -- MinTollerance: %v, \n\n",
 		// 	currentPrice, currentChange, thresholdSell, thresholdBuy, toleranceThreshhold(maxChange, toleranceIndicator), toleranceThreshhold(minChange, toleranceIndicator))
 
-		if canSell && primaryCapability > 0 {
-			do.MarketOrder(api.S, "sell", tradingPair, tradeAmount)
-			priceChangeList = nil
-			startPrice = 0
+		if canSell {
 			log.Printf("Time to sell, current change: %v \n With Price Of start: %v and current is %v \n", currentChange, startPrice, currentPrice)
 			fmt.Printf("Time to sell, current change: %v \n With Price Of start: %v and current is %v \n", currentChange, startPrice, currentPrice)
-		}
-
-		if canBuy && secondaryCapability > 0 {
-			do.MarketOrder(api.S, "buy", tradingPair, tradeAmount)
+			if primaryCapability > 0 {
+				do.MarketOrder(api.S, "sell", tradingPair, tradeAmount)
+				log.Println("Operation done")
+			}
 			priceChangeList = nil
 			startPrice = 0
+		}
+
+		if canBuy {
 			log.Printf("Time to buy, current change: %v \n With Price Of start: %v and current is %v \n", currentChange, startPrice, currentPrice)
 			fmt.Printf("Time to buy, current change: %v \n With Price Of start: %v and current is %v \n", currentChange, startPrice, currentPrice)
+			if secondaryCapability > 0 {
+				do.MarketOrder(api.S, "buy", tradingPair, tradeAmount)
+				log.Println("Operation done")
+			}
+			priceChangeList = nil
+			startPrice = 0
 		}
 
 	}
