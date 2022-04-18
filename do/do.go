@@ -210,18 +210,20 @@ func CurrencyHodlings(s *kucoin.ApiService, sy string) (float64, error) {
 
 	var resp *kucoin.ApiResponse
 	var err error
-	var e error
-
-	var info = kucoin.AccountsModel{}
 
 	for {
 		resp, err = s.Accounts(sy, "")
-		e = resp.ReadData(&info)
-		if err == nil && e == nil {
-			break
+		if err != nil && resp.Code == "200000" {
+			log.Printf("[Retrying] Error in accounts %v", err)
 		} else {
-			log.Printf("[Retrying] Error in getting and reading accounts error: %v, \n second error: %v", err, e)
+			break
 		}
+	}
+
+	var info = kucoin.AccountsModel{}
+
+	if err := resp.ReadData(&info); err != nil {
+		log.Printf("Error in reading accounts %v", err)
 	}
 
 	v, err := strconv.ParseFloat(info[0].Available, 64)
