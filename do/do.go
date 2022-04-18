@@ -217,7 +217,7 @@ func CurrencyHodlings(s *kucoin.ApiService, sy string) (float64, error) {
 	for {
 		resp, err = s.Accounts(sy, "")
 		e = resp.ReadData(&info)
-		if err == nil || e == nil {
+		if err == nil && e == nil {
 			break
 		} else {
 			log.Printf("[Retrying] Error in getting and reading accounts error: %v, \n second error: %v", err, e)
