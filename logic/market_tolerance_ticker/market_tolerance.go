@@ -143,13 +143,8 @@ func calcPriceThresholds(price float64, baseMargin float64, dayChange float64) (
 		buyMargin = baseMargin + changeIndicator*-0.0015
 	}
 
-	fmt.Printf("Change rate is: %v \n", changeIndicator)
-	fmt.Printf("buyMargin: %v \n SellMarting: %v \n", buyMargin, sellMargin)
-
 	sell = utility.RoundFloat(price+sellMargin*price, 3)
 	buy = utility.RoundFloat(price-buyMargin*price, 3)
-
-	fmt.Printf("BuyThresh: %v \n SellThresh: %v \n", buy, sell)
 	return sell, buy
 }
 
