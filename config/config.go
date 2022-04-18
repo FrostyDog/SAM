@@ -7,21 +7,16 @@ const (
 )
 
 const (
-	TradingSize             = "1"
+	TradingSize             = "0.5"
 	PrimarySymbol           = "SOL"
 	SecondarySymbol         = "USDT"
 	DecimalPointNumber uint = 3
-	DPriceMargin            = 0.009
+	BaseMargin              = 0.005 // more than 0.002
 	DChangeRate             = 0
 )
 
 var TradingPair string = PrimarySymbol + "-" + SecondarySymbol
-var PriceMargin float64 = DPriceMargin //should be more than 0.002
 var ChangeRate float64 = DChangeRate
-
-func SetPriceMargin(newPrice float64) {
-	PriceMargin = newPrice
-}
 
 func SetChangeRate(newPrice float64) {
 	ChangeRate = newPrice

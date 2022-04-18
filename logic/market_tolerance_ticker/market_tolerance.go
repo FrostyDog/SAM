@@ -17,7 +17,7 @@ import (
 )
 
 // Tollerance with minimum margin on the fly model (Sell "by market")
-func LaunchMarketToleranceTicker(s *kucoin.ApiService, primarySymbol string, secondarySymbol string, priceMargin float64, entryPrice float64) {
+func LaunchMarketToleranceTicker(s *kucoin.ApiService, primarySymbol string, secondarySymbol string, baseMargin float64, entryPrice float64) {
 
 	logFile, _ := os.OpenFile("log.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	defer logFile.Close()
@@ -26,25 +26,31 @@ func LaunchMarketToleranceTicker(s *kucoin.ApiService, primarySymbol string, sec
 	var tradingPair string = primarySymbol + "-" + secondarySymbol
 	var priceChangeList []float64
 	var startPrice float64
-	var toleranceIndicator float64 = 0.3 //0.3
+	var toleranceIndicator float64 = 0.25 //0.3 deafult
 	var maxChange float64
 	var minChange float64
-	var thresholdBuy float64  //startPrice - PriceMargin * startPrice
-	var thresholdSell float64 //startPrice + PriceMargin * startPrice
+	var thresholdBuy float64  //startPrice - baseMargin * startPrice
+	var thresholdSell float64 //startPrice + baseMargin * startPrice
 	var primaryCapability int64
 	var secondaryCapability int64
 	var tradeAmount string = config.TradingSize
+
+	var dayChange float64
 
 	ticker := time.NewTicker(2 * time.Second)
 
 	// Execute entryPrice logic only once before the ticket --- config phase
 	if entryPrice != 0 {
 		startPrice = entryPrice
-		thresholdSell, thresholdBuy = calcPriceThresholds(startPrice, priceMargin)
+		thresholdSell, thresholdBuy = calcPriceThresholds(startPrice, baseMargin, dayChange)
 	}
 
 	for _ = range ticker.C {
-		priceInString := do.GetCurrentPrice(api.S, tradingPair)
+		stats := do.GetCurrentStats(api.S, tradingPair)
+
+		dayChange, _ = strconv.ParseFloat(stats.ChangeRate, 64)
+
+		priceInString := stats.Last
 		currentPrice, _ := strconv.ParseFloat(priceInString, 64)
 
 		primaryHoldings, err := do.CurrencyHodlings(api.S, primarySymbol)
@@ -61,7 +67,7 @@ func LaunchMarketToleranceTicker(s *kucoin.ApiService, primarySymbol string, sec
 
 		if startPrice == 0 {
 			startPrice = currentPrice
-			thresholdSell, thresholdBuy = calcPriceThresholds(startPrice, priceMargin)
+			thresholdSell, thresholdBuy = calcPriceThresholds(startPrice, baseMargin, dayChange)
 		}
 
 		currentChange := utility.RoundFloat(currentPrice-startPrice, 3)
@@ -122,9 +128,28 @@ func calcSecondaryCapability(avaliable float64, currentPrice float64) int64 {
 	return int64(math.Floor(ans))
 }
 
-func calcPriceThresholds(price float64, margin float64) (sell float64, buy float64) {
-	sell = utility.RoundFloat(price+margin*price, 3)
-	buy = utility.RoundFloat(price-margin*price, 3)
+func calcPriceThresholds(price float64, baseMargin float64, dayChange float64) (sell float64, buy float64) {
+
+	changeIndicator := (dayChange * 100)
+	changeIndicator = utility.RoundFloat(changeIndicator, 3)
+
+	sellMargin := baseMargin
+	buyMargin := baseMargin
+
+	// every 1% is 0.0015 (0.15%)
+	if changeIndicator > 0 {
+		sellMargin = baseMargin + changeIndicator*0.0015
+	} else {
+		buyMargin = baseMargin + changeIndicator*-0.0015
+	}
+
+	fmt.Printf("Change rate is: %v \n", changeIndicator)
+	fmt.Printf("buyMargin: %v \n SellMarting: %v \n", buyMargin, sellMargin)
+
+	sell = utility.RoundFloat(price+sellMargin*price, 3)
+	buy = utility.RoundFloat(price-buyMargin*price, 3)
+
+	fmt.Printf("BuyThresh: %v \n SellThresh: %v \n", buy, sell)
 	return sell, buy
 }
 

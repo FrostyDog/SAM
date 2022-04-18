@@ -25,7 +25,7 @@ func LaunchBasicTicker(s *kucoin.ApiService, tradingPair string) {
 
 	ticker := time.NewTicker(5 * time.Second)
 	for _ = range ticker.C {
-		currentPrice = do.GetCurrentPrice(api.S, tradingPair)
+		currentPrice = do.Get24hStats(api.S, tradingPair).Last
 		transactionNotExists = !do.OrderExists(api.S)
 
 		if transactionNotExists {

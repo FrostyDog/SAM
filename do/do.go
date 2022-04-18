@@ -40,7 +40,7 @@ func CalculatePrice(side string, currentPrice string) (targetPrice string) {
 		if err != nil {
 			fmt.Println("error accured during parsing")
 		}
-		var p float64 = t + t*config.PriceMargin
+		var p float64 = t + t*config.BaseMargin
 		return fmt.Sprint(utility.RoundFloat(p, config.DecimalPointNumber))
 	}
 
@@ -49,7 +49,7 @@ func CalculatePrice(side string, currentPrice string) (targetPrice string) {
 		if err != nil {
 			fmt.Println("error accured during parsing")
 		}
-		var p float64 = t - t*config.PriceMargin
+		var p float64 = t - t*config.BaseMargin
 		return fmt.Sprint(utility.RoundFloat(p, config.DecimalPointNumber))
 	}
 
@@ -124,7 +124,7 @@ func Get24hStats(s *kucoin.ApiService, symbol string) (stats kucoin.Stats24hrMod
 
 }
 
-func GetCurrentPrice(s *kucoin.ApiService, symbol string) (currentPrice string) {
+func GetCurrentStats(s *kucoin.ApiService, symbol string) (stats kucoin.Stats24hrModel) {
 
 	var rsp *kucoin.ApiResponse
 	var err error
@@ -138,13 +138,13 @@ func GetCurrentPrice(s *kucoin.ApiService, symbol string) (currentPrice string) 
 		}
 	}
 
-	as := kucoin.Stats24hrModel{}
-	if err := rsp.ReadData(&as); err != nil {
+	stats = kucoin.Stats24hrModel{}
+	if err := rsp.ReadData(&stats); err != nil {
 		fmt.Println("some error during reading")
 		return
 	}
 
-	return as.Last
+	return stats
 
 }
 
@@ -210,20 +210,18 @@ func CurrencyHodlings(s *kucoin.ApiService, sy string) (float64, error) {
 
 	var resp *kucoin.ApiResponse
 	var err error
-
-	for {
-		resp, err = s.Accounts(sy, "")
-		if err == nil {
-			break
-		} else {
-			log.Printf("[Retrying] Error in accounts %v", err)
-		}
-	}
+	var e error
 
 	var info = kucoin.AccountsModel{}
 
-	if err := resp.ReadData(&info); err != nil {
-		log.Printf("Error in reading accounts %v", err)
+	for {
+		resp, err = s.Accounts(sy, "")
+		e = resp.ReadData(&info)
+		if err == nil || e == nil {
+			break
+		} else {
+			log.Printf("[Retrying] Error in getting and reading accounts error: %v, \n second error: %v", err, e)
+		}
 	}
 
 	v, err := strconv.ParseFloat(info[0].Available, 64)
