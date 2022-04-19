@@ -213,7 +213,7 @@ func CurrencyHodlings(s *kucoin.ApiService, sy string) (float64, error) {
 
 	for {
 		resp, err = s.Accounts(sy, "")
-		if err != nil && resp.Code == "200000" {
+		if err != nil && resp.Code != "200000" {
 			log.Printf("[Retrying] Error in accounts %v", err)
 		} else {
 			break
