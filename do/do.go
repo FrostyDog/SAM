@@ -206,10 +206,16 @@ func MarketOrder(s *kucoin.ApiService, side string, sy string, size string) {
 	}
 }
 
-func CurrencyHodlings(s *kucoin.ApiService, sy string) (float64, error) {
+func CurrencyHodlings(s *kucoin.ApiService, sy string) (holdings float64, err error) {
 
 	var resp *kucoin.ApiResponse
-	var err error
+
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("[Recovered] %v", err)
+			holdings, err = CurrencyHodlings(s, sy)
+		}
+	}()
 
 	for {
 		resp, err = s.Accounts(sy, "")
@@ -230,5 +236,7 @@ func CurrencyHodlings(s *kucoin.ApiService, sy string) (float64, error) {
 
 	v, err := strconv.ParseFloat(info[0].Available, 64)
 
-	return utility.RoundFloat(v, 3), err
+	holdings = utility.RoundFloat(v, 3)
+
+	return holdings, err
 }
