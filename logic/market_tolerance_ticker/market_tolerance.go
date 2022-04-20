@@ -136,11 +136,11 @@ func calcPriceThresholds(price float64, baseMargin float64, dayChange float64) (
 	sellMargin := baseMargin
 	buyMargin := baseMargin
 
-	// every 1% is 0.0015 (0.15%)
+	// every 1% is 0.001 (0.1%)
 	if changeIndicator > 0 {
-		sellMargin = baseMargin + changeIndicator*0.0015
+		sellMargin = baseMargin + changeIndicator*0.0010
 	} else {
-		buyMargin = baseMargin + changeIndicator*-0.0015
+		buyMargin = baseMargin + changeIndicator*-0.0010
 	}
 
 	sell = utility.RoundFloat(price+sellMargin*price, 3)
