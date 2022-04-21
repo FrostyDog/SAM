@@ -1,0 +1,16 @@
+2022/04/22 00:47:11 Current price is 101.73  -- Current Change: 0 
+ thresholdSell 102.442, -- thresholdBuy: 101.018 
+ Max Tollerance: 0 -- MinTollerance: 0, 
+
+2022/04/22 00:47:13 Current price is 101.73  -- Current Change: 0 
+ thresholdSell 102.442, -- thresholdBuy: 101.018 
+ Max Tollerance: 0 -- MinTollerance: 0, 
+
+2022/04/22 00:47:15 Current price is 101.708  -- Current Change: -0.022 
+ thresholdSell 102.442, -- thresholdBuy: 101.018 
+ Max Tollerance: 0 -- MinTollerance: -0.0154, 
+
+2022/04/22 00:47:17 Current price is 101.685  -- Current Change: -0.045 
+ thresholdSell 102.442, -- thresholdBuy: 101.018 
+ Max Tollerance: 0 -- MinTollerance: -0.0315, 
+
