@@ -35,7 +35,7 @@ func LaunchMarketToleranceTicker(s *kucoin.ApiService, primarySymbol string, sec
 	var secondaryCapability int64
 	var tradeAmount string = config.TradingSize
 
-	var sideIndicator float64 = 0.00
+	var sideIndicator float64 = 1.00
 
 	ticker := time.NewTicker(2 * time.Second)
 
@@ -68,6 +68,7 @@ func LaunchMarketToleranceTicker(s *kucoin.ApiService, primarySymbol string, sec
 		if startPrice == 0 {
 			startPrice = currentPrice
 			thresholdSell, thresholdBuy = calcPriceThresholds(startPrice, baseMargin, sideIndicator)
+			log.Printf("New threshholds are for sell %v and buy: %v\n", thresholdSell, thresholdBuy)
 		}
 
 		currentChange := utility.RoundFloat(currentPrice-startPrice, 3)
@@ -91,6 +92,7 @@ func LaunchMarketToleranceTicker(s *kucoin.ApiService, primarySymbol string, sec
 			priceChangeList = nil
 			startPrice = 0
 			sideIndicator = sideIndicator + 1.00 //harder to sell second time
+			log.Printf("New sideIndiator is %v \n", sideIndicator)
 		}
 
 		if canBuy && secondaryCapability > 0 {
@@ -100,6 +102,7 @@ func LaunchMarketToleranceTicker(s *kucoin.ApiService, primarySymbol string, sec
 			priceChangeList = nil
 			startPrice = 0
 			sideIndicator = sideIndicator - 1.00 //harder to buy second time
+			log.Printf("New sideIndiator is %v \n", sideIndicator)
 		}
 
 	}
