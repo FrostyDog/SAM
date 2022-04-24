@@ -7,7 +7,7 @@ const (
 )
 
 const (
-	TradingSize             = "1.0"
+	TradingSize             = "1.5"
 	PrimarySymbol           = "SOL"
 	SecondarySymbol         = "USDT"
 	DecimalPointNumber uint = 3
