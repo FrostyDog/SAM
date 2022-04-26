@@ -103,6 +103,13 @@ func LaunchMarketToleranceTicker(s *kucoin.ApiService, primarySymbol string, sec
 			sideIndicator = sideIndicator - 1.00 //harder to buy second time
 		}
 
+		// no operation part
+		if canBuy && secondaryCapability <= 0 {
+			log.Printf("Updateing start price, current change: %v \n With Price Of start: %v and current is %v \n", currentChange, startPrice, currentPrice)
+			priceChangeList = nil
+			startPrice = 0
+		}
+
 	}
 
 }
@@ -131,10 +138,11 @@ func calcPriceThresholds(price float64, baseMargin float64, sideIndicator float6
 	buyMargin := baseMargin
 
 	if sideIndicator > 0 {
-		sellMargin = baseMargin + sideIndicator*0.0050
+		sellMargin = baseMargin + sideIndicator*0.01
+		buyMargin = baseMargin - 0.002
 	}
 	if sideIndicator < 0 {
-		buyMargin = baseMargin + sideIndicator*-0.0050
+		buyMargin = baseMargin + sideIndicator*-0.01
 	}
 
 	log.Printf("New sideIndiator is %v \n", sideIndicator)
@@ -142,7 +150,7 @@ func calcPriceThresholds(price float64, baseMargin float64, sideIndicator float6
 	sell = utility.RoundFloat(price+sellMargin*price, 3)
 	buy = utility.RoundFloat(price-buyMargin*price, 3)
 
-	log.Printf("Thresholds: sell %v, buy is : \n", sell, buy)
+	log.Printf("Thresholds: sell %v, buy is : %v \n", sell, buy)
 
 	return sell, buy
 }
@@ -161,7 +169,7 @@ func canBuy(currentChange float64, minChange float64, tolerance float64, current
 	return res || rapidDrop
 }
 
-// If change was more than 3% or -3% === do the oposite action to correct the flow to balance the capabilities
+// If change was more than 3% or -3% - do the appropriate action
 func isRapidChange(startPrice float64, currentPrice float64) (rapidRise bool, rapidDrop bool) {
 	changePersantage := (currentPrice - startPrice) / startPrice * 100
 	rapidRise = changePersantage >= 3
