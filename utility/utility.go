@@ -23,3 +23,18 @@ func MinMax(array []float64) (float64, float64) {
 	}
 	return min, max
 }
+
+func MinMaxSingle(lastMax float64, lastMin float64, currentChange float64) (min float64, max float64) {
+
+	min = lastMin
+	max = lastMax
+
+	if currentChange > lastMax {
+		max = currentChange
+	}
+	if lastMin > currentChange {
+		min = currentChange
+	}
+
+	return min, max
+}

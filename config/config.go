@@ -7,11 +7,11 @@ const (
 )
 
 const (
-	TradingSize             = "1.5"
-	PrimarySymbol           = "SOL"
+	TradingSize             = "0.04"
+	PrimarySymbol           = "PAXG"
 	SecondarySymbol         = "USDT"
 	DecimalPointNumber uint = 3
-	BaseMargin              = 0.006 // more than 0.002
+	BaseMargin              = 0.003 // more than 0.002
 	DChangeRate             = 0
 )
 
