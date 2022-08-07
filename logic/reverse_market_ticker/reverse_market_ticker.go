@@ -15,7 +15,7 @@ package logic
 // )
 
 // // Tollerance with minimum margin on the fly model (Sell "by market")
-// func LaunchReverseMarketTicker(s *kucoin.ApiService, primarySymbol string, secondarySymbol string, baseMargin float64) {
+// func LaunchReverseMarketTicker(s *kucoin.ApiService, t *time.Ticker, primarySymbol string, secondarySymbol string, baseMargin float64) {
 
 // 	logFile, _ := os.OpenFile("log.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 // 	defer logFile.Close()
@@ -32,9 +32,7 @@ package logic
 // 	var primaryHoldings float64
 // 	var secondaryHoldings float64
 
-// 	ticker := time.NewTicker(2 * time.Second)
-
-// 	for _ = range ticker.C {
+// 	for _ = range t.C {
 // 		stats := do.GetCurrentStats(api.S, tradingPair)
 
 // 		priceInString := stats.Last
