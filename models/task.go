@@ -2,7 +2,6 @@ package models
 
 import (
 	"fmt"
-	"sync"
 	"time"
 
 	logic "github.com/FrostyDog/SAM/logic/gold_ticker"
@@ -17,16 +16,14 @@ type Task struct {
 	Status    bool
 }
 
-var wg sync.WaitGroup
 var CurrentTask Task = createNewTask()
 
-func (t *Task) Stop() {
+func (t *Task) stop() {
 	t.closeChan <- true
 	t.Status = false
 }
-func (t *Task) Run() {
+func (t *Task) run() {
 	t.Status = true
-	wg.Add(1)
 	go func() {
 		for i := range t.ticker.C {
 			t.fn()
@@ -34,8 +31,7 @@ func (t *Task) Run() {
 			select {
 			case <-t.closeChan:
 				fmt.Println("stopping")
-				t.ticker.Stop()
-				wg.Done()
+				return
 			default:
 				continue
 			}
@@ -50,9 +46,9 @@ func createNewTask() Task {
 }
 
 func RunTask(t *Task) {
-	t.Run()
+	t.run()
 }
 
 func StopTask(t *Task) {
-	t.Stop()
+	t.stop()
 }

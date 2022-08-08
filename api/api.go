@@ -85,5 +85,5 @@ func statusChangerHandler(w http.ResponseWriter, r *http.Request) {
 
 func statusHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "Current task status\n: %v", models.CurrentTask.Status)
+	fmt.Fprintf(w, "Current task status: %v", models.CurrentTask.Status)
 }
