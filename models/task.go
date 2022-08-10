@@ -43,7 +43,7 @@ func (t *Task) run() {
 
 func createNewTask() Task {
 	var closeCh = make(chan bool)
-	task := Task{ticker: time.NewTicker(1 * time.Second), fn: logic.GrowScraping, Status: false, closeChan: closeCh}
+	task := Task{ticker: time.NewTicker(10 * time.Second), fn: logic.GrowScraping, Status: false, closeChan: closeCh}
 	return task
 }
 

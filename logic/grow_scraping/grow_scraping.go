@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -12,15 +13,19 @@ import (
 
 var coins kucoin.TickersModel
 
+var targetCoin *kucoin.TickerModel
+var initialGrowth string = ""
+
 func GrowScraping(s *kucoin.ApiService) {
-	logSetup()
+	logFile, _ := os.OpenFile("log.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	defer logFile.Close()
+	log.SetOutput(logFile)
 
-	var targetCoin *kucoin.TickerModel
-	var initialGrowth string = ""
-
+	fmt.Println(targetCoin)
 	if targetCoin == nil {
 		coins = do.GetAllCoinStats(s)
 		targetCoin = iterateAndSetTargetCoin(coins)
+		fmt.Println(targetCoin)
 		if targetCoin != nil {
 			initialGrowth = targetCoin.ChangeRate
 			log.Printf("The coins %s is bought at %s growth rate", targetCoin.Symbol, initialGrowth)
@@ -38,12 +43,6 @@ func GrowScraping(s *kucoin.ApiService) {
 			initialGrowth = ""
 		}
 	}
-}
-
-func logSetup() {
-	logFile, _ := os.OpenFile("log.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	defer logFile.Close()
-	log.SetOutput(logFile)
 }
 
 // Search for a target coin in all coins, returns coin and initial growth rate
