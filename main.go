@@ -1,12 +1,15 @@
 package main
 
 import (
-	"fmt"
+	"sync"
 
-	"github.com/FrostyDog/SAM/api"
+	"github.com/FrostyDog/SAM/models"
 )
 
 func main() {
-	api.StartServer()
-	fmt.Println("everything is done")
+	// api.StartServer()
+	wg := new(sync.WaitGroup)
+	wg.Add(1)
+	models.RunTask(&models.CurrentTask)
+	wg.Wait()
 }

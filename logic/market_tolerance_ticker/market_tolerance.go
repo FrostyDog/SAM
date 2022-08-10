@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"time"
 
-	api "github.com/FrostyDog/SAM/API"
 	"github.com/FrostyDog/SAM/config"
 	"github.com/FrostyDog/SAM/do"
+	api "github.com/FrostyDog/SAM/kucoin-api"
 	"github.com/FrostyDog/SAM/utility"
 
 	"github.com/Kucoin/kucoin-go-sdk"

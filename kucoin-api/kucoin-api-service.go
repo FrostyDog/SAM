@@ -1,4 +1,4 @@
-package api
+package kucoin_api
 
 import (
 	"github.com/FrostyDog/SAM/config"

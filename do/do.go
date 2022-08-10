@@ -121,7 +121,6 @@ func Get24hStats(s *kucoin.ApiService, symbol string) (stats kucoin.Stats24hrMod
 	}
 
 	return as
-
 }
 
 func GetCurrentStats(s *kucoin.ApiService, symbol string) (stats kucoin.Stats24hrModel) {
@@ -239,4 +238,29 @@ func CurrencyHodlings(s *kucoin.ApiService, sy string) (holdings float64, err er
 	holdings = utility.RoundFloat(v, 3)
 
 	return holdings, err
+}
+
+func GetAllCoinStats(s *kucoin.ApiService) kucoin.TickersModel {
+
+	var rsp *kucoin.ApiResponse
+	var respErr error
+	var allCoinsData kucoin.TickersResponseModel
+
+	for {
+		rsp, respErr = s.Tickers()
+		if respErr != nil {
+			log.Printf("[Retrying] Error in tickers %v", respErr)
+		} else if rsp.Code != "200000" {
+			log.Printf("[Retrying] KuCoin internal error in tickers %v", respErr)
+		} else {
+			break
+		}
+	}
+
+	allCoinsData = kucoin.TickersResponseModel{}
+	if err := rsp.ReadData(&allCoinsData); err != nil {
+		fmt.Println("Error during reading all coins tickers")
+	}
+
+	return allCoinsData.Tickers
 }

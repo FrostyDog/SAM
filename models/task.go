@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"time"
 
-	logic "github.com/FrostyDog/SAM/logic/gold_ticker"
+	kucoin_api "github.com/FrostyDog/SAM/kucoin-api"
+	logic "github.com/FrostyDog/SAM/logic/grow_scraping"
+	"github.com/Kucoin/kucoin-go-sdk"
 )
 
-type Executable func()
+type Executable func(s *kucoin.ApiService)
 
 type Task struct {
 	ticker    *time.Ticker
@@ -24,10 +26,10 @@ func (t *Task) stop() {
 }
 func (t *Task) run() {
 	t.Status = true
+	fmt.Println("Running task")
 	go func() {
-		for i := range t.ticker.C {
-			t.fn()
-			fmt.Println(i.Second())
+		for _ = range t.ticker.C {
+			t.fn(kucoin_api.S)
 			select {
 			case <-t.closeChan:
 				fmt.Println("stopping")
@@ -41,7 +43,7 @@ func (t *Task) run() {
 
 func createNewTask() Task {
 	var closeCh = make(chan bool)
-	task := Task{ticker: time.NewTicker(1 * time.Second), fn: logic.GoldRun, Status: false, closeChan: closeCh}
+	task := Task{ticker: time.NewTicker(1 * time.Second), fn: logic.GrowScraping, Status: false, closeChan: closeCh}
 	return task
 }
 
