@@ -39,6 +39,7 @@ func StartServer() {
 		port = 8081
 	}
 	start(host, port)
+
 }
 
 func logsHandler(w http.ResponseWriter, r *http.Request) {

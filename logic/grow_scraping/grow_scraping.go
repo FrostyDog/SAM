@@ -67,18 +67,18 @@ func iterateAndSetTargetCoin(coins kucoin.TickersModel) *kucoin.TickerModel {
 }
 
 // assesing if it is time to sell the coin
-func assesAndSell(stats kucoin.Stats24hrModel, oldPrice string) bool {
-	price, err := strconv.ParseFloat(stats.ChangeRate, 64)
+func assesAndSell(stats kucoin.Stats24hrModel, initialPrice string) bool {
+	price, err := strconv.ParseFloat(stats.Last, 64)
 	if err != nil {
 		log.Printf("error when parsing current price: %v", err)
 	}
 
-	initialPrice, err := strconv.ParseFloat(oldPrice, 64)
+	initPrice, err := strconv.ParseFloat(initialPrice, 64)
 	if err != nil {
 		log.Printf("error when parsing initial price: %v", err)
 	}
 
-	priceDiff := price / initialPrice
+	priceDiff := price / initPrice
 
 	// if rise by 10% more fix the profit
 	if priceDiff > 1.1 {
@@ -86,7 +86,7 @@ func assesAndSell(stats kucoin.Stats24hrModel, oldPrice string) bool {
 		return true
 	}
 	// if fall by 6.5% sell to stop loss
-	if price < 0.945 {
+	if priceDiff < 0.945 {
 		log.Printf("[Stoploss] Time to sell %s with current price: %s", stats.Symbol, stats.Last)
 		return true
 	}
