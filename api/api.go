@@ -42,7 +42,7 @@ func StartServer() {
 }
 
 func logsHandler(w http.ResponseWriter, r *http.Request) {
-	content, err := os.ReadFile("logs.txt")
+	content, err := os.ReadFile("log.txt")
 	if err != nil {
 		fmt.Fprintf(w, "Hello, looks like some error is occured: %s", err)
 	}

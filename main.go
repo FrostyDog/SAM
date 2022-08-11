@@ -1,15 +1,7 @@
 package main
 
-import (
-	"sync"
-
-	"github.com/FrostyDog/SAM/models"
-)
+import "github.com/FrostyDog/SAM/api"
 
 func main() {
-	// api.StartServer()
-	wg := new(sync.WaitGroup)
-	wg.Add(1)
-	models.RunTask(&models.CurrentTask)
-	wg.Wait()
+	api.StartServer()
 }

@@ -15,6 +15,7 @@ var coins kucoin.TickersModel
 
 var targetCoin *kucoin.TickerModel
 var initialGrowth string = ""
+var initialPrice string = ""
 
 func GrowScraping(s *kucoin.ApiService) {
 	logFile, _ := os.OpenFile("log.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
@@ -28,7 +29,8 @@ func GrowScraping(s *kucoin.ApiService) {
 		fmt.Println(targetCoin)
 		if targetCoin != nil {
 			initialGrowth = targetCoin.ChangeRate
-			log.Printf("The coins %s is bought at %s growth rate", targetCoin.Symbol, initialGrowth)
+			initialPrice = targetCoin.Last
+			log.Printf("The coins %s is bought at %s growth rate with a price of %s", targetCoin.Symbol, initialGrowth, initialPrice)
 			// buy a coin
 			// set a stop loss (market stop, so it will not book coins)
 			// set a take profit (market stop, for the same reason above)
@@ -36,11 +38,13 @@ func GrowScraping(s *kucoin.ApiService) {
 		}
 	} else { //case for local testing
 		currentStats := do.GetCurrentStats(s, targetCoin.Symbol)
-		var sold bool = assesAndSell(currentStats, initialGrowth)
+		var sold bool = assesAndSell(currentStats, initialPrice)
 
+		// clean-up before next cycle
 		if sold {
 			targetCoin = nil
 			initialGrowth = ""
+			initialPrice = ""
 		}
 	}
 }
@@ -63,27 +67,27 @@ func iterateAndSetTargetCoin(coins kucoin.TickersModel) *kucoin.TickerModel {
 }
 
 // assesing if it is time to sell the coin
-func assesAndSell(stats kucoin.Stats24hrModel, initialGrowth string) bool {
-	rate, err := strconv.ParseFloat(stats.ChangeRate, 64)
+func assesAndSell(stats kucoin.Stats24hrModel, oldPrice string) bool {
+	price, err := strconv.ParseFloat(stats.ChangeRate, 64)
 	if err != nil {
-		log.Printf("error when comparing coins [pasing value]: %v", err)
+		log.Printf("error when parsing current price: %v", err)
 	}
 
-	initialRate, err := strconv.ParseFloat(initialGrowth, 64)
+	initialPrice, err := strconv.ParseFloat(oldPrice, 64)
 	if err != nil {
-		log.Printf("error when comparing coins [pasing value]: %v", err)
+		log.Printf("error when parsing initial price: %v", err)
 	}
 
-	rateDiff := rate - initialRate
+	priceDiff := price / initialPrice
 
 	// if rise by 10% more fix the profit
-	if rateDiff > 0.1 {
-		log.Printf("[PROFIT] Time to sell %s with current rate: %s", stats.Symbol, stats.ChangeRate)
+	if priceDiff > 1.1 {
+		log.Printf("[PROFIT] Time to sell %s with current price: %s", stats.Symbol, stats.Last)
 		return true
 	}
 	// if fall by 6.5% sell to stop loss
-	if rateDiff < -0.065 {
-		log.Printf("[Stoploss] Time to sell %s with current rate: %s", stats.Symbol, stats.ChangeRate)
+	if price < 0.945 {
+		log.Printf("[Stoploss] Time to sell %s with current price: %s", stats.Symbol, stats.Last)
 		return true
 	}
 
