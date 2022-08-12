@@ -1,7 +1,6 @@
 package logic
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -22,11 +21,10 @@ func GrowScraping(s *kucoin.ApiService) {
 	defer logFile.Close()
 	log.SetOutput(logFile)
 
-	fmt.Println(targetCoin)
 	if targetCoin == nil {
 		coins = do.GetAllCoinStats(s)
-		targetCoin = iterateAndSetTargetCoin(coins)
-		fmt.Println(targetCoin)
+		filteredCoins := filterCoins(coins)
+		targetCoin = iterateAndSetTargetCoin(filteredCoins)
 		if targetCoin != nil {
 			initialGrowth = targetCoin.ChangeRate
 			initialPrice = targetCoin.Last
@@ -50,9 +48,9 @@ func GrowScraping(s *kucoin.ApiService) {
 }
 
 // Search for a target coin in all coins, returns coin and initial growth rate
-func iterateAndSetTargetCoin(coins kucoin.TickersModel) *kucoin.TickerModel {
+func iterateAndSetTargetCoin(filteredCoins kucoin.TickersModel) *kucoin.TickerModel {
 
-	for _, coin := range coins {
+	for _, coin := range filteredCoins {
 		changeRate, err := strconv.ParseFloat(coin.ChangeRate, 64)
 		if err != nil {
 			log.Printf("Error during converstion: %v", err)
@@ -64,6 +62,20 @@ func iterateAndSetTargetCoin(coins kucoin.TickersModel) *kucoin.TickerModel {
 	}
 
 	return nil
+}
+
+// filter coin pair to the USDT pairs only
+func filterCoins(coins kucoin.TickersModel) kucoin.TickersModel {
+	var filteredCoins kucoin.TickersModel
+
+	for _, coin := range coins {
+		symbols := strings.Split(coin.Symbol, "-")
+		if symbols[1] == "USDT" {
+			filteredCoins = append(filteredCoins, coin)
+		}
+	}
+
+	return filteredCoins
 }
 
 // assesing if it is time to sell the coin
