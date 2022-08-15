@@ -5,6 +5,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/FrostyDog/SAM/do"
 	"github.com/Kucoin/kucoin-go-sdk"
@@ -15,6 +16,7 @@ var coins kucoin.TickersModel
 var targetCoin *kucoin.TickerModel
 var initialGrowth string = ""
 var initialPrice string = ""
+var endTimer = make(chan bool)
 
 func GrowScraping(s *kucoin.ApiService) {
 	logFile, _ := os.OpenFile("log.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
@@ -26,6 +28,8 @@ func GrowScraping(s *kucoin.ApiService) {
 		filteredCoins := filterCoins(coins)
 		targetCoin = iterateAndSetTargetCoin(filteredCoins)
 		if targetCoin != nil {
+			// resete values after 24h
+			go timeBomb(targetCoin)
 			initialGrowth = targetCoin.ChangeRate
 			initialPrice = targetCoin.Last
 			log.Printf("The coins %s is bought at %s growth rate with a price of %s", targetCoin.Symbol, initialGrowth, initialPrice)
@@ -40,9 +44,8 @@ func GrowScraping(s *kucoin.ApiService) {
 
 		// clean-up before next cycle
 		if sold {
-			targetCoin = nil
-			initialGrowth = ""
-			initialPrice = ""
+			endTimer <- true
+			reseteValues()
 		}
 	}
 }
@@ -62,6 +65,28 @@ func iterateAndSetTargetCoin(filteredCoins kucoin.TickersModel) *kucoin.TickerMo
 	}
 
 	return nil
+}
+
+func timeBomb(coins *kucoin.TickerModel) {
+	select {
+	case <-endTimer:
+		return
+	case <-time.After(36 * time.Hour):
+		logFile, _ := os.OpenFile("log.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+		defer logFile.Close()
+		log.SetOutput(logFile)
+		log.Printf("timer has cleared")
+		// TODO: market sell here at current price
+		reseteValues()
+		return
+	}
+
+}
+
+func reseteValues() {
+	targetCoin = nil
+	initialGrowth = ""
+	initialPrice = ""
 }
 
 // filter coin pair to the USDT pairs only

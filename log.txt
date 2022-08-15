@@ -1,1 +1,36 @@
-2022/08/12 18:20:50 The coins SWASH-USDT is bought at 0.3115 growth rate with a price of 0.02896
+2022/08/14 14:18:41 The coins 1EARTH-USDT is bought at 0.2314 growth rate with a price of 0.004863
+2022/08/14 14:19:11 The coins 1EARTH-USDT is bought at 0.2311 growth rate with a price of 0.0048632022/08/15 14:11:52 The coins NUM-USDT is bought at 0.2044 growth rate with a price of 0.0654
+2022/08/15 14:12:59 The coins NUM-USDT is bought at 0.2022 growth rate with a price of 0.0654
+2022/08/15 14:13:18 The coins NUM-USDT is bought at 0.2066 growth rate with a price of 0.0654
+2022/08/15 14:14:09 The coins NUM-USDT is bought at 0.2066 growth rate with a price of 0.0654
+2022/08/15 14:14:29 The coins ZBC-USDT is bought at 0.2507 growth rate with a price of 0.03048
+2022/08/15 14:16:15 The coins NUM-USDT is bought at 0.2022 growth rate with a price of 0.0648
+2022/08/15 14:16:35 The coins NUM-USDT is bought at 0.2022 growth rate with a price of 0.0648
+2022/08/15 14:17:25 The coins NUM-USDT is bought at 0.2022 growth rate with a price of 0.0648
+2022/08/15 14:17:56 timer has cleared
+2022/08/15 14:18:25 The coins NUM-USDT is bought at 0.2022 growth rate with a price of 0.0648
+2022/08/15 14:18:45 The coins NUM-USDT is bought at 0.2022 growth rate with a price of 0.0648
+2022/08/15 14:19:20 The coins NUM-USDT is bought at 0.2022 growth rate with a price of 0.0648
+2022/08/15 15:23:19 The coins SWASH-USDT is bought at 0.2053 growth rate with a price of 0.03457
+2022/08/15 15:23:39 The coins SWASH-USDT is bought at 0.2057 growth rate with a price of 0.03458
+2022/08/15 15:23:58 The coins SWASH-USDT is bought at 0.2053 growth rate with a price of 0.03457
+2022/08/15 15:24:28 The coins SWASH-USDT is bought at 0.2069 growth rate with a price of 0.03459
+2022/08/15 15:26:40 The coins SPA-USDT is bought at 0.3048 growth rate with a price of 0.00826
+2022/08/15 15:59:27 The coins SWASH-USDT is bought at 0.2223 growth rate with a price of 0.03529
+2022/08/15 16:00:09 timer has cleared
+2022/08/15 16:00:48 The coins SWASH-USDT is bought at 0.2059 growth rate with a price of 0.03507
+2022/08/15 16:01:20 The coins NUM-USDT is bought at 0.2234 growth rate with a price of 0.0657
+2022/08/15 16:01:51 error when parsing initial price: strconv.ParseFloat: parsing "": invalid syntax
+2022/08/15 16:01:51 [PROFIT] Time to sell NUM-USDT with current price: 0.0658
+2022/08/15 17:11:12 The coins NUM-USDT is bought at 0.2462 growth rate with a price of 0.0663
+2022/08/15 17:11:32 The coins NUM-USDT is bought at 0.2481 growth rate with a price of 0.0664
+2022/08/15 17:12:24 The coins NUM-USDT is bought at 0.2612 growth rate with a price of 0.0671
+timer has cleared2022/08/15 17:12:52 The coins NUM-USDT is bought at 0.2537 growth rate with a price of 0.0667
+2022/08/15 17:13:45 The coins NUM-USDT is bought at 0.28 growth rate with a price of 0.0681
+timer has cleared2022/08/15 17:14:05 The coins NUM-USDT is bought at 0.28 growth rate with a price of 0.0681
+timer has cleared2022/08/15 17:19:47 The coins NUM-USDT is bought at 0.2669 growth rate with a price of 0.0674
+2022/08/15 17:20:00 timer has cleared
+2022/08/15 17:20:07 The coins NUM-USDT is bought at 0.2574 growth rate with a price of 0.0674
+2022/08/15 17:20:23 The coins NUM-USDT is bought at 0.2574 growth rate with a price of 0.0674
+2022/08/15 17:20:36 timer has cleared
+2022/08/15 17:20:43 The coins NUM-USDT is bought at 0.2574 growth rate with a price of 0.0674
