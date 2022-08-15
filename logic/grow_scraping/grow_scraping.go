@@ -28,7 +28,7 @@ func GrowScraping(s *kucoin.ApiService) {
 		filteredCoins := filterCoins(coins)
 		targetCoin = iterateAndSetTargetCoin(filteredCoins)
 		if targetCoin != nil {
-			// resete values after 24h
+			// resete values 36h
 			go timeBomb(targetCoin)
 			initialGrowth = targetCoin.ChangeRate
 			initialPrice = targetCoin.Last
@@ -124,7 +124,7 @@ func assesAndSell(stats kucoin.Stats24hrModel, initialPrice string) bool {
 	}
 	// if fall by 6.5% sell to stop loss
 	if priceDiff < 0.945 {
-		log.Printf("[Stoploss] Time to sell %s with current price: %s", stats.Symbol, stats.Last)
+		log.Printf("[STOPLOSS] Time to sell %s with current price: %s", stats.Symbol, stats.Last)
 		return true
 	}
 
