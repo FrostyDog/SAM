@@ -13,14 +13,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
-/**
-Please note Start functions is a placeholder for you to start your own solution.
-Feel free to drop gorilla.mux if you want and use any other solution available.
-main function reads host/port from env just for an example, flavor it following your taste
-*/
-
 // Start /** Starts the web server listener on given host and port.
-func start(host string, port int) {
+func start(host string, port int, cert string, key string) {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/logs", logsHandler).Methods("GET")
@@ -28,17 +22,23 @@ func start(host string, port int) {
 	r.HandleFunc("/status", statusChangerHandler).Methods("Post")
 
 	log.Println(fmt.Printf("Starting API server on %s:%d\n", host, port))
-	if err := http.ListenAndServe(fmt.Sprintf("%s:%d", host, port), r); err != nil {
+	// if err := http.ListenAndServe(fmt.Sprintf("%s:%d", host, port), r); err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	if err := http.ListenAndServeTLS(fmt.Sprintf("%s:%d", host, port), cert, key, r); err != nil {
 		log.Fatal(err)
 	}
 }
 func StartServer() {
 	host := os.Getenv("HOST")
 	port, err := strconv.Atoi(os.Getenv("PORT"))
+	cert := "/etc/letsencrypt/live/frostydog.space/fullchain.pem"
+	key := "/etc/letsencrypt/live/frostydog.space/privkey.pem"
 	if err != nil {
 		port = 8081
 	}
-	start(host, port)
+	start(host, port, cert, key)
 
 }
 

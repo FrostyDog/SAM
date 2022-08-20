@@ -62,13 +62,13 @@ func GetCorrelationPrice(s *kucoin.ApiService, symbol string) (correlactionPrice
 
 	rsp, err := s.Stats24hr(symbol)
 	if err != nil {
-		fmt.Println("error in account")
+		log.Printf("error in account: %s", err)
 		return
 	}
 
 	as := kucoin.Stats24hrModel{}
 	if err := rsp.ReadData(&as); err != nil {
-		fmt.Println("some error during reading")
+		log.Printf("some error during reading: %v", err)
 		return
 	}
 
