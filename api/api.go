@@ -17,29 +17,43 @@ import (
 func start(host string, port int, cert string, key string) {
 	r := mux.NewRouter()
 
-	r.HandleFunc("/logs", logsHandler).Methods("GET")
-	r.HandleFunc("/status", statusHandler).Methods("GET")
-	r.HandleFunc("/status", statusChangerHandler).Methods("Post")
+	r.HandleFunc("/logs", CORS(logsHandler)).Methods("GET")
+	r.HandleFunc("/status", CORS(statusHandler)).Methods("GET")
+	r.HandleFunc("/status", CORS(statusChangerHandler)).Methods("Post")
 
 	log.Println(fmt.Printf("Starting API server on %s:%d\n", host, port))
-	// if err := http.ListenAndServe(fmt.Sprintf("%s:%d", host, port), r); err != nil {
-	// 	log.Fatal(err)
-	// }
 
 	if err := http.ListenAndServeTLS(fmt.Sprintf("%s:%d", host, port), cert, key, r); err != nil {
 		log.Fatal(err)
 	}
 }
+
 func StartServer() {
 	host := os.Getenv("HOST")
 	port, err := strconv.Atoi(os.Getenv("PORT"))
-	cert := "/etc/letsencrypt/live/frostydog.space/fullchain.pem"
-	key := "/etc/letsencrypt/live/frostydog.space/privkey.pem"
+	cert := "/etc/letsencrypt/live/api.frostydog.space/fullchain.pem"
+	key := "/etc/letsencrypt/live/api.frostydog.space/privkey.pem"
 	if err != nil {
-		port = 8081
+		port = 443
 	}
 	start(host, port, cert, key)
 
+}
+
+func CORS(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Access-Control-Allow-Origin", "*")
+		w.Header().Add("Access-Control-Allow-Credentials", "true")
+		w.Header().Add("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		w.Header().Add("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+
+		if r.Method == "OPTIONS" {
+			http.Error(w, "No Content", http.StatusNoContent)
+			return
+		}
+
+		next(w, r)
+	}
 }
 
 func logsHandler(w http.ResponseWriter, r *http.Request) {
@@ -85,6 +99,11 @@ func statusChangerHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func statusHandler(w http.ResponseWriter, r *http.Request) {
+	data := struct {
+		Status bool `json:"status"`
+	}{Status: models.CurrentTask.Status}
+
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "Current task status: %v", models.CurrentTask.Status)
+	json.NewEncoder(w).Encode(data)
 }
