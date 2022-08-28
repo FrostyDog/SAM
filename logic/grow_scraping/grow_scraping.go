@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/FrostyDog/SAM/do"
+	"github.com/FrostyDog/SAM/models"
 	"github.com/Kucoin/kucoin-go-sdk"
 )
 
@@ -20,7 +21,7 @@ var endTimer = make(chan bool)
 
 // update with custom short term rise calculation
 
-var container kucoin.TickersModel
+var container models.SnapshotsContainer
 
 func GrowScraping(s *kucoin.ApiService) {
 	logFile, _ := os.OpenFile("log.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)

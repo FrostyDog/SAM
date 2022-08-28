@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	"github.com/FrostyDog/SAM/models"
+	"github.com/FrostyDog/SAM/task"
 	"github.com/gorilla/mux"
 )
 
@@ -79,17 +80,17 @@ func statusChangerHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch bodyContent.Action {
 	case "startTask":
-		if models.CurrentTask.Status {
-			fmt.Fprintf(w, "Task already running with status: %v", models.CurrentTask.Status)
+		if task.CurrentTask.Status {
+			fmt.Fprintf(w, "Task already running with status: %v", task.CurrentTask.Status)
 		} else {
-			models.RunTask(&models.CurrentTask)
+			task.RunTask(&task.CurrentTask)
 			fmt.Fprintf(w, "Task has started")
 		}
 	case "stopTask":
-		if !models.CurrentTask.Status {
-			fmt.Fprintf(w, "Task is not running. Staus: %v", models.CurrentTask.Status)
+		if !task.CurrentTask.Status {
+			fmt.Fprintf(w, "Task is not running. Staus: %v", task.CurrentTask.Status)
 		} else {
-			models.StopTask(&models.CurrentTask)
+			task.StopTask(&task.CurrentTask)
 			fmt.Fprintf(w, "Task has stopped")
 		}
 	default:
@@ -101,7 +102,7 @@ func statusChangerHandler(w http.ResponseWriter, r *http.Request) {
 func statusHandler(w http.ResponseWriter, r *http.Request) {
 	data := struct {
 		Status bool `json:"status"`
-	}{Status: models.CurrentTask.Status}
+	}{Status: task.CurrentTask.Status}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

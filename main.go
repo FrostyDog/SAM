@@ -2,12 +2,12 @@ package main
 
 import (
 	"github.com/FrostyDog/SAM/api"
-	"github.com/FrostyDog/SAM/models"
+	"github.com/FrostyDog/SAM/task"
 )
 
 func main() {
 	// manually initialize the task and server
-	models.RunTask(&models.CurrentTask)
+	task.RunTask(&task.CurrentTask)
 	api.StartServer()
 
 }
