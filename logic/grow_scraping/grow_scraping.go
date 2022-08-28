@@ -21,8 +21,8 @@ var endTimer = make(chan bool)
 var timeBombStatus bool
 
 // update with custom short term rise calculation
-
-var container models.SnapshotsContainer
+var snapsCounter int = 0
+var snaps models.SnapshotsContainer = models.NewSnapshotsContainter()
 
 func GrowScraping(s *kucoin.ApiService) {
 	logFile, _ := os.OpenFile("log.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
@@ -32,7 +32,21 @@ func GrowScraping(s *kucoin.ApiService) {
 	if targetCoin == nil {
 		coins = do.GetAllCoinStats(s)
 		filteredCoins := filterCoins(coins)
-		targetCoin = iterateAndSetTargetCoin(filteredCoins)
+
+		snapsCounter++
+		// every 5 min
+		// if snapsCounter == 30 {
+		if snapsCounter == 2 {
+			snapsCounter = 0
+			snaps.AddSnapshotAndReplace(filteredCoins)
+		}
+
+		// if enough info - look for target
+		if len(snaps) == 2 {
+			targetCoin = iterateAndSetTargetCoin(snaps)
+		}
+
+		// if during 3 function above token in set
 		if targetCoin != nil {
 			// resete values 36h
 			if !timeBombStatus {
@@ -53,22 +67,28 @@ func GrowScraping(s *kucoin.ApiService) {
 
 		// clean-up before next cycle
 		if sold {
-			endTimer <- true
 			reseteValues()
 		}
 	}
 }
 
 // Search for a target coin in all coins, returns coin and initial growth rate
-func iterateAndSetTargetCoin(filteredCoins kucoin.TickersModel) *kucoin.TickerModel {
+func iterateAndSetTargetCoin(snaps models.SnapshotsContainer) *kucoin.TickerModel {
 
-	for _, coin := range filteredCoins {
-		changeRate, err := strconv.ParseFloat(coin.ChangeRate, 64)
+	for i, coin := range snaps[0] {
+		newerData := snaps[1][i]
+
+		priceOld, err := strconv.ParseFloat(coin.Last, 64)
 		if err != nil {
 			log.Printf("Error during converstion: %v", err)
 		}
 
-		if assessRate(changeRate) {
+		priceNewer, err := strconv.ParseFloat(newerData.Last, 64)
+		if err != nil {
+			log.Printf("Error during converstion: %v", err)
+		}
+
+		if calcRate(priceOld, priceNewer) {
 			return coin
 		}
 	}
@@ -96,7 +116,9 @@ func reseteValues() {
 	targetCoin = nil
 	initialGrowth = ""
 	initialPrice = ""
+
 	timeBombStatus = false
+	endTimer <- true
 }
 
 // filter coin pair to the USDT pairs only + without levarage
@@ -144,8 +166,10 @@ func assesAndSell(stats kucoin.Stats24hrModel, initialPrice string) bool {
 }
 
 // returns true is growRate >20%
-func assessRate(rate float64) bool {
-	return rate > 0.2
+func calcRate(oldPrice float64, newPrice float64) bool {
+	calc := newPrice / oldPrice
+	// if growing rate >6% in 5 min - than target this coin
+	return calc > 1.06
 }
 
 // compare growsRate and returns coin with largest growth Rate

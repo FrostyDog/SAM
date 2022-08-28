@@ -12,7 +12,24 @@ func NewSnapshotsContainter() SnapshotsContainer {
 	return SnapshotsContainer{}
 }
 
-func (cont SnapshotsContainer) AddSnapshots(list kucoin.TickersModel, number int) {
+// Appending snap while removing left-hand value (max snaps = 2)
+func (cont SnapshotsContainer) AddSnapshotAndReplace(list kucoin.TickersModel) {
+	switch len(cont) {
+	case 0:
+		cont[0] = list
+	case 1:
+		cont[1] = list
+	case 2:
+		cont[0] = cont[1]
+		cont[1] = list
+	}
+}
+
+func (cont SnapshotsContainer) AddSnapshot(list kucoin.TickersModel) {
+	cont[len(cont)] = list
+}
+
+func (cont SnapshotsContainer) AddSnapshotAtIndex(list kucoin.TickersModel, number int) {
 	cont[number] = list
 }
 
