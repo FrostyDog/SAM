@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	kucoin_api "github.com/FrostyDog/SAM/kucoin-api"
 	logic "github.com/FrostyDog/SAM/logic/grow_scraping"
+	kucoin_api "github.com/FrostyDog/SAM/third-party/kucoin-api"
 	"github.com/Kucoin/kucoin-go-sdk"
 )
 

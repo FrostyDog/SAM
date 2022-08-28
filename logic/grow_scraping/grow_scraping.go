@@ -18,6 +18,10 @@ var initialGrowth string = ""
 var initialPrice string = ""
 var endTimer = make(chan bool)
 
+// update with custom short term rise calculation
+
+var container kucoin.TickersModel
+
 func GrowScraping(s *kucoin.ApiService) {
 	logFile, _ := os.OpenFile("log.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	defer logFile.Close()
@@ -59,7 +63,7 @@ func iterateAndSetTargetCoin(filteredCoins kucoin.TickersModel) *kucoin.TickerMo
 			log.Printf("Error during converstion: %v", err)
 		}
 
-		if assessRate(changeRate) && assessForLeverage(coin.Symbol) {
+		if assessRate(changeRate) {
 			return coin
 		}
 	}
@@ -89,13 +93,14 @@ func reseteValues() {
 	initialPrice = ""
 }
 
-// filter coin pair to the USDT pairs only
+// filter coin pair to the USDT pairs only + without levarage
 func filterCoins(coins kucoin.TickersModel) kucoin.TickersModel {
 	var filteredCoins kucoin.TickersModel
 
 	for _, coin := range coins {
 		symbols := strings.Split(coin.Symbol, "-")
-		if symbols[1] == "USDT" {
+		hasLevarage := strings.Contains(symbols[0], "3L") || strings.Contains(symbols[0], "3S")
+		if symbols[1] == "USDT" && !hasLevarage {
 			filteredCoins = append(filteredCoins, coin)
 		}
 	}
@@ -135,13 +140,6 @@ func assesAndSell(stats kucoin.Stats24hrModel, initialPrice string) bool {
 // returns true is growRate >20%
 func assessRate(rate float64) bool {
 	return rate > 0.2
-}
-
-// returns false if 3L or 3S are contained
-func assessForLeverage(symbol string) bool {
-	symbols := strings.Split(symbol, "-")
-	hasLevarage := strings.Contains(symbols[0], "3L") || strings.Contains(symbols[0], "3S")
-	return !hasLevarage
 }
 
 // compare growsRate and returns coin with largest growth Rate
