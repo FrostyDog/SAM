@@ -18,6 +18,7 @@ var targetCoin *kucoin.TickerModel
 var initialGrowth string = ""
 var initialPrice string = ""
 var endTimer = make(chan bool)
+var timeBombStatus bool
 
 // update with custom short term rise calculation
 
@@ -34,7 +35,10 @@ func GrowScraping(s *kucoin.ApiService) {
 		targetCoin = iterateAndSetTargetCoin(filteredCoins)
 		if targetCoin != nil {
 			// resete values 36h
-			go timeBomb(targetCoin)
+			if !timeBombStatus {
+				timeBombStatus = true
+				go timeBomb(targetCoin)
+			}
 			initialGrowth = targetCoin.ChangeRate
 			initialPrice = targetCoin.Last
 			log.Printf("The coins %s is bought at %s growth rate with a price of %s", targetCoin.Symbol, initialGrowth, initialPrice)
@@ -92,6 +96,7 @@ func reseteValues() {
 	targetCoin = nil
 	initialGrowth = ""
 	initialPrice = ""
+	timeBombStatus = false
 }
 
 // filter coin pair to the USDT pairs only + without levarage
