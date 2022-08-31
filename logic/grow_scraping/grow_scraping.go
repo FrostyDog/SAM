@@ -34,9 +34,8 @@ func GrowScraping(s *kucoin.ApiService) {
 		filteredCoins := filterCoins(coins)
 
 		snapsCounter++
-		// every 5 min
-		// if snapsCounter == 30 {
-		if snapsCounter == 2 {
+		// every 15 min (10 sec * 90 = 900 sec)
+		if snapsCounter == 90 {
 			snapsCounter = 0
 			snaps.AddSnapshotAndReplace(filteredCoins)
 		}
@@ -168,7 +167,10 @@ func assesAndSell(stats kucoin.Stats24hrModel, initialPrice string) bool {
 // returns true is growRate >20%
 func calcRate(oldPrice float64, newPrice float64) bool {
 	calc := newPrice / oldPrice
-	// if growing rate >6% in 5 min - than target this coin
+	// if growing rate >5% in 15 min - than target this coin
+	if calc > 1.05 {
+		log.Printf("NewPrice was: %f and oldPrice: %f, which gives calc at %f", newPrice, oldPrice, calc)
+	}
 	return calc > 1.06
 }
 
