@@ -118,6 +118,8 @@ func reseteValues() {
 
 	timeBombStatus = false
 	endTimer <- true
+
+	snaps.ClearSnapshots()
 }
 
 // filter coin pair to the USDT pairs only + without levarage
