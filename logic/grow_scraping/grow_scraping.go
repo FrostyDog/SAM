@@ -168,12 +168,15 @@ func assesAndSell(stats kucoin.Stats24hrModel, initialPrice string) bool {
 
 // returns true is growRate >20%
 func calcRate(oldPrice float64, newPrice float64) bool {
+
+	var threshhold float64 = 1.05
+
 	calc := newPrice / oldPrice
 	// if growing rate >5% in 15 min - than target this coin
-	if calc > 1.05 {
+	if calc > threshhold {
 		log.Printf("NewPrice was: %f and oldPrice: %f, which gives calc at %f", newPrice, oldPrice, calc)
 	}
-	return calc > 1.06
+	return calc > threshhold
 }
 
 // compare growsRate and returns coin with largest growth Rate
