@@ -208,7 +208,11 @@ func MarketOrder(s *kucoin.ApiService, side string, sy string, size string, base
 	} else {
 		o = kucoin.CreateOrderModel{ClientOid: uuid.New().String(), Type: "market", Side: side, Symbol: sy, Funds: size}
 	}
-	_, err := s.CreateOrder(&o)
+	res, err := s.CreateOrder(&o)
+
+	if res.Code != "200000" {
+		log.Printf("error is market order. response: %v", res)
+	}
 
 	if err != nil {
 		log.Fatal(err)
@@ -244,6 +248,44 @@ func CurrencyHodlings(s *kucoin.ApiService, sy string) (holdings float64, err er
 	}
 
 	v, err := strconv.ParseFloat(info[0].Available, 64)
+
+	holdings = utility.RoundFloat(v, 3)
+
+	return holdings, err
+}
+
+// return avaliable stable amount - 1 dollar (for minor things)
+func StableCurrencyHodlings(s *kucoin.ApiService, sy string) (holdings float64, err error) {
+
+	var resp *kucoin.ApiResponse
+
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("[Recovered] %v", err)
+			holdings, err = CurrencyHodlings(s, sy)
+		}
+	}()
+
+	for {
+		resp, err = s.Accounts(sy, "")
+		if err != nil {
+			log.Printf("[Retrying] Error in accounts %v", err)
+		} else if resp.Code != "200000" {
+			log.Printf("[Retrying] KuCoin internal error in accounts %v", err)
+		} else {
+			break
+		}
+	}
+
+	var info = kucoin.AccountsModel{}
+
+	if err := resp.ReadData(&info); err != nil {
+		log.Printf("Error in reading accounts %v", err)
+	}
+
+	v, err := strconv.ParseFloat(info[0].Available, 64)
+
+	v = v - 1.00
 
 	holdings = utility.RoundFloat(v, 3)
 

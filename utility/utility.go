@@ -4,9 +4,10 @@ import (
 	"math"
 )
 
+// returns the greatest float64 value less than or equal to x.
 func RoundFloat(val float64, precision uint) float64 {
 	ratio := math.Pow(10, float64(precision))
-	return math.Round(val*ratio) / ratio
+	return math.Floor(val*ratio) / ratio
 }
 
 // MinMax in float64

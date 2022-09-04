@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -113,11 +114,11 @@ func timeBomb(coins *kucoin.TickerModel) {
 }
 
 func usdCapacity(s *kucoin.ApiService) string {
-	usdHoldings, err := do.AvaliableCurrencyHodlings(s, "USDT")
+	usdHoldings, err := do.StableCurrencyHodlings(s, "USDT")
 	if err != nil {
 		log.Printf("Failed at fetching USDT capacity: %s", err)
 	}
-	return usdHoldings
+	return fmt.Sprint(usdHoldings)
 }
 
 func targetCoinCapacity(s *kucoin.ApiService, targetTokenName string) string {
