@@ -186,7 +186,11 @@ func SellCoin(s *kucoin.ApiService, sy string, price string) (nextOperation stri
 	return "buy"
 }
 
-func MarketOrder(s *kucoin.ApiService, side string, sy string, size string) {
+func MarketOrder(s *kucoin.ApiService, side string, sy string, size string, baseOrQuote string) {
+
+	if baseOrQuote == "" {
+		baseOrQuote = "base"
+	}
 
 	if size == "" {
 		size = config.TradingSize
@@ -196,8 +200,14 @@ func MarketOrder(s *kucoin.ApiService, side string, sy string, size string) {
 		sy = config.TradingPair
 	}
 
-	o := kucoin.CreateOrderModel{ClientOid: uuid.New().String(), Type: "market", Side: side, Symbol: sy, Size: size}
+	o := kucoin.CreateOrderModel{}
 
+	// if set to "base" sell size with base currency else with quote(second placed)
+	if baseOrQuote == "base" {
+		o = kucoin.CreateOrderModel{ClientOid: uuid.New().String(), Type: "market", Side: side, Symbol: sy, Size: size}
+	} else {
+		o = kucoin.CreateOrderModel{ClientOid: uuid.New().String(), Type: "market", Side: side, Symbol: sy, Funds: size}
+	}
 	_, err := s.CreateOrder(&o)
 
 	if err != nil {
@@ -236,6 +246,39 @@ func CurrencyHodlings(s *kucoin.ApiService, sy string) (holdings float64, err er
 	v, err := strconv.ParseFloat(info[0].Available, 64)
 
 	holdings = utility.RoundFloat(v, 3)
+
+	return holdings, err
+}
+
+func AvaliableCurrencyHodlings(s *kucoin.ApiService, sy string) (holdings string, err error) {
+
+	var resp *kucoin.ApiResponse
+
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("[Recovered] %v", err)
+			holdings, err = AvaliableCurrencyHodlings(s, sy)
+		}
+	}()
+
+	for {
+		resp, err = s.Accounts(sy, "")
+		if err != nil {
+			log.Printf("[Retrying] Error in accounts %v", err)
+		} else if resp.Code != "200000" {
+			log.Printf("[Retrying] KuCoin internal error in accounts %v", err)
+		} else {
+			break
+		}
+	}
+
+	var info = kucoin.AccountsModel{}
+
+	if err := resp.ReadData(&info); err != nil {
+		log.Printf("Error in reading accounts %v", err)
+	}
+
+	holdings = info[0].Available
 
 	return holdings, err
 }

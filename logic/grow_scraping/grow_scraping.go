@@ -15,7 +15,6 @@ import (
 var coins kucoin.TickersModel
 
 var targetCoin *kucoin.TickerModel
-var initialGrowth string = ""
 var initialPrice string = ""
 var endTimer = make(chan bool)
 var timeBombStatus bool
@@ -52,20 +51,22 @@ func GrowScraping(s *kucoin.ApiService) {
 				timeBombStatus = true
 				go timeBomb(targetCoin)
 			}
-			initialGrowth = targetCoin.ChangeRate
 			initialPrice = targetCoin.Last
-			log.Printf("The coins %s is bought at %s growth rate with a price of %s", targetCoin.Symbol, initialGrowth, initialPrice)
-			// buy a coin
-			// set a stop loss (market stop, so it will not book coins)
-			// set a take profit (market stop, for the same reason above)
-			// ..and idle :)
+			usdCapacity := usdCapacity(s)
+			do.MarketOrder(s, "buy", targetCoin.Symbol, usdCapacity, "quote")
+			log.Printf("The coins %s is bought at a price of %s", targetCoin.Symbol, initialPrice)
+
 		}
 	} else { //case for local testing
 		currentStats := do.GetCurrentStats(s, targetCoin.Symbol)
-		var sold bool = assesAndSell(currentStats, initialPrice)
+		// sell a coin during asses and sell
+		var timeForSell bool = assesAndSell(currentStats, initialPrice)
 
 		// clean-up before next cycle
-		if sold {
+		if timeForSell {
+			coinSymbol := targetCoinSymbol(targetCoin.Symbol)
+			targetCoinCapacity := targetCoinCapacity(s, coinSymbol)
+			do.MarketOrder(s, "sell", targetCoin.Symbol, targetCoinCapacity, "base")
 			reseteValues()
 		}
 	}
@@ -111,9 +112,24 @@ func timeBomb(coins *kucoin.TickerModel) {
 
 }
 
+func usdCapacity(s *kucoin.ApiService) string {
+	usdHoldings, err := do.AvaliableCurrencyHodlings(s, "USDT")
+	if err != nil {
+		log.Printf("Failed at fetching USDT capacity: %s", err)
+	}
+	return usdHoldings
+}
+
+func targetCoinCapacity(s *kucoin.ApiService, targetTokenName string) string {
+	targetCoinHoldings, err := do.AvaliableCurrencyHodlings(s, targetTokenName)
+	if err != nil {
+		log.Printf("Failed at fetching TargetCoin capacity: %s", err)
+	}
+	return targetCoinHoldings
+}
+
 func reseteValues() {
 	targetCoin = nil
-	initialGrowth = ""
 	initialPrice = ""
 
 	timeBombStatus = false
@@ -135,6 +151,12 @@ func filterCoins(coins kucoin.TickersModel) kucoin.TickersModel {
 	}
 
 	return filteredCoins
+}
+
+// return symbol of the base currency from the target coin model
+func targetCoinSymbol(symbol string) string {
+	symbols := strings.Split(symbol, "-")
+	return symbols[0]
 }
 
 // assesing if it is time to sell the coin
