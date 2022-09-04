@@ -50,7 +50,7 @@ func GrowScraping(s *kucoin.ApiService) {
 			// resete values 36h
 			if !timeBombStatus {
 				timeBombStatus = true
-				go timeBomb(targetCoin)
+				go timeBomb(s, targetCoin)
 			}
 			initialPrice = targetCoin.Last
 			usdCapacity := usdCapacity(s)
@@ -97,7 +97,7 @@ func iterateAndSetTargetCoin(snaps models.SnapshotsContainer) *kucoin.TickerMode
 	return nil
 }
 
-func timeBomb(coins *kucoin.TickerModel) {
+func timeBomb(s *kucoin.ApiService, targetCoin *kucoin.TickerModel) {
 	select {
 	case <-endTimer:
 		return
@@ -106,11 +106,17 @@ func timeBomb(coins *kucoin.TickerModel) {
 		defer logFile.Close()
 		log.SetOutput(logFile)
 		log.Printf("timer has cleared")
-		// TODO: market sell here at current price
+		sellCoin(s, targetCoin)
 		reseteValues()
 		return
 	}
 
+}
+
+func sellCoin(s *kucoin.ApiService, targtetCoin *kucoin.TickerModel) {
+	coinSymbol := targetCoinSymbol(targtetCoin.Symbol)
+	targetCoinCapacity := targetCoinCapacity(s, coinSymbol)
+	do.MarketOrder(s, "sell", targetCoin.Symbol, targetCoinCapacity, "base")
 }
 
 func usdCapacity(s *kucoin.ApiService) string {
