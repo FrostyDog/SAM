@@ -131,9 +131,12 @@ func Get24hStats(s *kucoin.ApiService, symbol string) (stats kucoin.Stats24hrMod
 
 }
 
-func BuyCoin(s *kucoin.ApiService, sy string, price string) (nextOperation string) {
+// Creates an order to buy a coin.
+func BuyCoin(s *kucoin.ApiService, sy string, price string, size string) (nextOperation string) {
 
-	size := config.TradingSize
+	if size == "" {
+		size = config.TradingSize
+	}
 
 	if sy == "" {
 		sy = config.TradingPair
@@ -141,18 +144,19 @@ func BuyCoin(s *kucoin.ApiService, sy string, price string) (nextOperation strin
 
 	o := kucoin.CreateOrderModel{ClientOid: uuid.New().String(), Side: "buy", Symbol: sy, Price: price, Size: size}
 
-	_, err := s.CreateOrder(&o)
-
-	if err != nil {
-		log.Fatal(err)
+	res, err := s.CreateOrder(&o)
+	if res.Code != "200000" || err != nil {
+		log.Printf("error is creating a buy order. response: %v, error: %v", res, err)
 	}
-	fmt.Println("buy order is created")
 	return "sell"
 }
 
-func SellCoin(s *kucoin.ApiService, sy string, price string) (nextOperation string) {
+// Creates an order to sell a coin.
+func SellCoin(s *kucoin.ApiService, sy string, price string, size string) (nextOperation string) {
 
-	size := config.TradingSize
+	if size == "" {
+		size = config.TradingSize
+	}
 
 	if sy == "" {
 		sy = config.TradingPair
@@ -160,13 +164,11 @@ func SellCoin(s *kucoin.ApiService, sy string, price string) (nextOperation stri
 
 	o := kucoin.CreateOrderModel{ClientOid: uuid.New().String(), Side: "sell", Symbol: sy, Price: price, Size: size}
 
-	_, err := s.CreateOrder(&o)
-
-	if err != nil {
-		log.Fatal(err)
+	res, err := s.CreateOrder(&o)
+	if res.Code != "200000" || err != nil {
+		log.Printf("error is creating a sell order. response: %v, error: %v", res, err)
 	}
 
-	fmt.Println("sell order is created")
 	return "buy"
 }
 

@@ -10,6 +10,7 @@ import (
 
 	"github.com/FrostyDog/SAM/do"
 	"github.com/FrostyDog/SAM/models"
+	"github.com/FrostyDog/SAM/utility"
 	"github.com/Kucoin/kucoin-go-sdk"
 )
 
@@ -29,6 +30,12 @@ func GrowScraping(s *kucoin.ApiService) {
 	defer logFile.Close()
 	log.SetOutput(logFile)
 
+	// if there is an order waiting to be executed - return and stop this function iteration.
+	if !do.OrderExists(s) {
+		return
+	}
+
+	//
 	if targetCoin == nil {
 		coins = do.GetAllCoinStats(s)
 		filteredCoins := filterCoins(coins)
@@ -52,19 +59,18 @@ func GrowScraping(s *kucoin.ApiService) {
 				timeBombStatus = true
 				go timeBomb(s, targetCoin)
 			}
-			usdCapacity := usdCapacity(s)
-			do.MarketOrder(s, "buy", targetCoin.Symbol, usdCapacity, "quote")
+			targetCoinCapacity := targetCoinToBuy(s, initialPrice)
+			do.BuyCoin(s, targetCoin.Symbol, initialPrice, targetCoinCapacity)
 			log.Printf("The coins %s is bought at a price of %s", targetCoin.Symbol, initialPrice)
 
 		}
 	} else { //case for local testing
 		currentStats := do.Get24hStats(s, targetCoin.Symbol)
 		// sell a coin during asses and sell
-		var timeForSell bool = assesAndSell(currentStats, initialPrice)
+		var sold bool = assesAndSell(s, currentStats, initialPrice)
 
 		// clean-up before next cycle
-		if timeForSell {
-			sellCoin(s, targetCoin)
+		if sold {
 			reseteValues()
 		}
 	}
@@ -102,7 +108,7 @@ func calcRate(oldPrice float64, newPrice float64) bool {
 	var threshhold float64 = 1.06
 
 	calc := newPrice / oldPrice
-	// if growing rate >5% in 15 min - than target this coin
+	// if growing rate >6% in 15 min - than target this coin
 	if calc > threshhold {
 		log.Printf("NewPrice was: %f and oldPrice: %f, which gives calc at %f", newPrice, oldPrice, calc)
 	}
@@ -118,29 +124,38 @@ func timeBomb(s *kucoin.ApiService, targetCoin *kucoin.TickerModel) {
 		defer logFile.Close()
 		log.SetOutput(logFile)
 		log.Printf("timer has cleared")
-		sellCoin(s, targetCoin)
+		sellCoinMarket(s, targetCoin)
 		reseteValues()
 		return
 	}
 
 }
 
-func sellCoin(s *kucoin.ApiService, targtetCoin *kucoin.TickerModel) {
-	coinSymbol := targetCoinSymbol(targtetCoin.Symbol)
-	targetCoinCapacity := targetCoinCapacity(s, coinSymbol)
+func sellCoinMarket(s *kucoin.ApiService, targtetCoin *kucoin.TickerModel) {
+	targetCoinCapacity := targetCoinCapacity(s, targtetCoin.Symbol)
 	do.MarketOrder(s, "sell", targetCoin.Symbol, targetCoinCapacity, "base")
 }
 
-func usdCapacity(s *kucoin.ApiService) string {
+// return a float64 of avaliable USDT in account
+func usdCapacity(s *kucoin.ApiService) float64 {
 	usdHoldings, err := do.CurrencyHodlings(s, "USDT")
 	if err != nil {
 		log.Printf("Failed at fetching USDT capacity: %s", err)
 	}
-	return fmt.Sprint(usdHoldings)
+	return usdHoldings
 }
 
-func targetCoinCapacity(s *kucoin.ApiService, targetTokenName string) string {
-	targetCoinHoldings, err := do.CurrencyHodlings(s, targetTokenName)
+// calculates an amount of base currency that could be bought with usdt capasity.
+func targetCoinToBuy(s *kucoin.ApiService, price string) string {
+	usdCapacity := usdCapacity(s)
+	amountToBuy := usdCapacity / utility.StringToFloat64(initialPrice)
+
+	return fmt.Sprint(amountToBuy)
+}
+
+func targetCoinCapacity(s *kucoin.ApiService, symbol string) string {
+	coinSymbol := targetCoinSymbol(symbol)
+	targetCoinHoldings, err := do.CurrencyHodlings(s, coinSymbol)
 	if err != nil {
 		log.Printf("Failed at fetching TargetCoin capacity: %s", err)
 	}
@@ -178,8 +193,8 @@ func targetCoinSymbol(symbol string) string {
 	return symbols[0]
 }
 
-// assesing if it is time to sell the coin
-func assesAndSell(stats kucoin.Stats24hrModel, initialPrice string) bool {
+// assesing and selling the coin
+func assesAndSell(s *kucoin.ApiService, stats kucoin.Stats24hrModel, initialPrice string) bool {
 	price, err := strconv.ParseFloat(stats.Last, 64)
 	if err != nil {
 		log.Printf("error when parsing current price: %v", err)
@@ -194,11 +209,15 @@ func assesAndSell(stats kucoin.Stats24hrModel, initialPrice string) bool {
 
 	// if rise by 6% more fix the profit
 	if priceDiff > 1.06 {
+		targetCoinCapacity := targetCoinCapacity(s, stats.Symbol)
+		do.SellCoin(s, stats.Symbol, stats.Last, targetCoinCapacity)
 		log.Printf("[PROFIT] Time to sell %s with current price: %s", stats.Symbol, stats.Last)
 		return true
 	}
 	// if fall by 5.5% + 5% (simulation correction) sell to stop loss
 	if priceDiff < 0.895 {
+		targetCoinCapacity := targetCoinCapacity(s, stats.Symbol)
+		do.SellCoin(s, stats.Symbol, stats.Last, targetCoinCapacity)
 		log.Printf("[STOPLOSS] Time to sell %s with current price: %s", stats.Symbol, stats.Last)
 		return true
 	}
