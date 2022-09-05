@@ -233,8 +233,8 @@ func CurrencyHodlings(s *kucoin.ApiService, sy string) (holdings float64, err er
 
 	v, err := strconv.ParseFloat(info[0].Available, 64)
 
-	// reserving 0.2% of all amount for transactional fees
-	v = v - (v / 500)
+	// reserving 0.66% of all amount for transactional fees
+	v = v - (v / 166)
 
 	// flooring to 0.003 number (should work for most of the orders)
 	holdings = utility.RoundFloat(v, 3)
