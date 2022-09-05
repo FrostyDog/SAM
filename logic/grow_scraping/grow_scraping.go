@@ -64,9 +64,7 @@ func GrowScraping(s *kucoin.ApiService) {
 
 		// clean-up before next cycle
 		if timeForSell {
-			coinSymbol := targetCoinSymbol(targetCoin.Symbol)
-			targetCoinCapacity := targetCoinCapacity(s, coinSymbol)
-			do.MarketOrder(s, "sell", targetCoin.Symbol, targetCoinCapacity, "base")
+			sellCoin(s, targetCoin)
 			reseteValues()
 		}
 	}
@@ -115,7 +113,7 @@ func timeBomb(s *kucoin.ApiService, targetCoin *kucoin.TickerModel) {
 	select {
 	case <-endTimer:
 		return
-	case <-time.After(36 * time.Hour):
+	case <-time.After(20 * time.Hour):
 		logFile, _ := os.OpenFile("log.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 		defer logFile.Close()
 		log.SetOutput(logFile)
@@ -134,7 +132,7 @@ func sellCoin(s *kucoin.ApiService, targtetCoin *kucoin.TickerModel) {
 }
 
 func usdCapacity(s *kucoin.ApiService) string {
-	usdHoldings, err := do.StableCurrencyHodlings(s, "USDT")
+	usdHoldings, err := do.CurrencyHodlings(s, "USDT")
 	if err != nil {
 		log.Printf("Failed at fetching USDT capacity: %s", err)
 	}
@@ -142,11 +140,11 @@ func usdCapacity(s *kucoin.ApiService) string {
 }
 
 func targetCoinCapacity(s *kucoin.ApiService, targetTokenName string) string {
-	targetCoinHoldings, err := do.AvaliableCurrencyHodlings(s, targetTokenName)
+	targetCoinHoldings, err := do.CurrencyHodlings(s, targetTokenName)
 	if err != nil {
 		log.Printf("Failed at fetching TargetCoin capacity: %s", err)
 	}
-	return targetCoinHoldings
+	return fmt.Sprint(targetCoinHoldings)
 }
 
 func reseteValues() {
