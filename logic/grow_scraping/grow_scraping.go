@@ -52,7 +52,6 @@ func GrowScraping(s *kucoin.ApiService) {
 				timeBombStatus = true
 				go timeBomb(s, targetCoin)
 			}
-			initialPrice = targetCoin.Last
 			usdCapacity := usdCapacity(s)
 			do.MarketOrder(s, "buy", targetCoin.Symbol, usdCapacity, "quote")
 			log.Printf("The coins %s is bought at a price of %s", targetCoin.Symbol, initialPrice)
@@ -90,11 +89,26 @@ func iterateAndSetTargetCoin(snaps models.SnapshotsContainer) *kucoin.TickerMode
 		}
 
 		if calcRate(priceOld, priceNewer) {
+			// setting initial price to the latest (that used as the base for counting)
+			initialPrice = newerData.Last
 			return coin
 		}
 	}
 
 	return nil
+}
+
+// returns true is growRate is big enough
+func calcRate(oldPrice float64, newPrice float64) bool {
+
+	var threshhold float64 = 1.06
+
+	calc := newPrice / oldPrice
+	// if growing rate >5% in 15 min - than target this coin
+	if calc > threshhold {
+		log.Printf("NewPrice was: %f and oldPrice: %f, which gives calc at %f", newPrice, oldPrice, calc)
+	}
+	return calc > threshhold
 }
 
 func timeBomb(s *kucoin.ApiService, targetCoin *kucoin.TickerModel) {
@@ -193,19 +207,6 @@ func assesAndSell(stats kucoin.Stats24hrModel, initialPrice string) bool {
 
 	return false
 
-}
-
-// returns true is growRate >20%
-func calcRate(oldPrice float64, newPrice float64) bool {
-
-	var threshhold float64 = 1.05
-
-	calc := newPrice / oldPrice
-	// if growing rate >5% in 15 min - than target this coin
-	if calc > threshhold {
-		log.Printf("NewPrice was: %f and oldPrice: %f, which gives calc at %f", newPrice, oldPrice, calc)
-	}
-	return calc > threshhold
 }
 
 // compare growsRate and returns coin with largest growth Rate

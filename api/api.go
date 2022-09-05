@@ -35,7 +35,7 @@ func StartServer() {
 	cert := "/etc/letsencrypt/live/api.frostydog.space/fullchain.pem"
 	key := "/etc/letsencrypt/live/api.frostydog.space/privkey.pem"
 	if err != nil {
-		port = 443
+		port = 8081
 	}
 	start(host, port, cert, key)
 
