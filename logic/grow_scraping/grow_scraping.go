@@ -31,7 +31,7 @@ func GrowScraping(s *kucoin.ApiService) {
 	log.SetOutput(logFile)
 
 	// if there is an order waiting to be executed - return and stop this function iteration.
-	if !do.OrderExists(s) {
+	if do.OrderExists(s) {
 		return
 	}
 
