@@ -199,8 +199,8 @@ func assesAndSell(stats kucoin.Stats24hrModel, initialPrice string) bool {
 		log.Printf("[PROFIT] Time to sell %s with current price: %s", stats.Symbol, stats.Last)
 		return true
 	}
-	// if fall by 6.5% sell to stop loss
-	if priceDiff < 0.945 {
+	// if fall by 5.5% + 5% (simulation correction) sell to stop loss
+	if priceDiff < 0.895 {
 		log.Printf("[STOPLOSS] Time to sell %s with current price: %s", stats.Symbol, stats.Last)
 		return true
 	}
