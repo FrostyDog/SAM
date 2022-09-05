@@ -58,7 +58,7 @@ func GrowScraping(s *kucoin.ApiService) {
 
 		}
 	} else { //case for local testing
-		currentStats := do.GetCurrentStats(s, targetCoin.Symbol)
+		currentStats := do.Get24hStats(s, targetCoin.Symbol)
 		// sell a coin during asses and sell
 		var timeForSell bool = assesAndSell(currentStats, initialPrice)
 

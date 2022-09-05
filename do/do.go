@@ -108,22 +108,6 @@ func GetAvarage24hPrice(s *kucoin.ApiService, symbol string) (avaragePrice strin
 }
 
 func Get24hStats(s *kucoin.ApiService, symbol string) (stats kucoin.Stats24hrModel) {
-	rsp, err := s.Stats24hr(symbol)
-	if err != nil {
-		fmt.Println("error in account")
-		return
-	}
-
-	as := kucoin.Stats24hrModel{}
-	if err := rsp.ReadData(&as); err != nil {
-		fmt.Println("some error during reading")
-		return
-	}
-
-	return as
-}
-
-func GetCurrentStats(s *kucoin.ApiService, symbol string) (stats kucoin.Stats24hrModel) {
 
 	var rsp *kucoin.ApiResponse
 	var err error
