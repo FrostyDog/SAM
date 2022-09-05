@@ -194,8 +194,8 @@ func assesAndSell(stats kucoin.Stats24hrModel, initialPrice string) bool {
 
 	priceDiff := price / initPrice
 
-	// if rise by 10% more fix the profit
-	if priceDiff > 1.1 {
+	// if rise by 6% more fix the profit
+	if priceDiff > 1.06 {
 		log.Printf("[PROFIT] Time to sell %s with current price: %s", stats.Symbol, stats.Last)
 		return true
 	}
