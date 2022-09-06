@@ -150,6 +150,8 @@ func targetCoinToBuy(s *kucoin.ApiService, price string) string {
 	usdCapacity := usdCapacity(s)
 	amountToBuy := usdCapacity / utility.StringToFloat64(initialPrice)
 
+	amountToBuy = utility.RoundFloat(amountToBuy, 3)
+
 	return fmt.Sprint(amountToBuy)
 }
 
@@ -207,8 +209,8 @@ func assesAndSell(s *kucoin.ApiService, stats kucoin.Stats24hrModel, initialPric
 
 	priceDiff := price / initPrice
 
-	// if rise by 6% more fix the profit
-	if priceDiff > 1.06 {
+	// if rise by 6.5% more fix the profit
+	if priceDiff > 1.065 {
 		targetCoinCapacity := targetCoinCapacity(s, stats.Symbol)
 		do.SellCoin(s, stats.Symbol, stats.Last, targetCoinCapacity)
 		log.Printf("[PROFIT] Time to sell %s with current price: %s", stats.Symbol, stats.Last)
