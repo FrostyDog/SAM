@@ -19,16 +19,24 @@ func OrderExists(s *kucoin.ApiService) bool {
 	}
 
 	var paginationParam = kucoin.PaginationParam{PageSize: 10, CurrentPage: 1}
+	var resp *kucoin.ApiResponse
+	var errr error
 
-	resp, err := s.Orders(params, &paginationParam)
-	if err != nil {
-		log.Fatal(err)
+	for {
+		resp, errr = s.Orders(params, &paginationParam)
+		if errr != nil {
+			log.Printf("[Retrying] Error in existing orders %v", errr)
+		} else if resp.Code != "200000" {
+			log.Printf("[Retrying] Kucoin error in resp Code in existing orders, resp:%v, err: %v", resp, errr)
+		} else {
+			break
+		}
 	}
 
 	as := kucoin.OrdersModel{}
-	_, err = resp.ReadPaginationData(&as) // put variable instead of blank to see pagination/page resutlss
+	_, err := resp.ReadPaginationData(&as) // put variable instead of blank to see pagination/page resutlss
 	if err != nil {
-		fmt.Println("Failed at reading pagination")
+		fmt.Println("Failed at reading pagination in orders")
 	}
 
 	return len(as) != 0
