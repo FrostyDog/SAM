@@ -59,8 +59,9 @@ func GrowScraping(s *kucoin.ApiService) {
 				timeBombStatus = true
 				go timeBomb(s, targetCoin)
 			}
-			targetCoinCapacity := targetCoinToBuy(s, initialPrice)
-			do.BuyCoin(s, targetCoin.Symbol, initialPrice, targetCoinCapacity)
+			// uncomment for real time scenario
+			// targetCoinCapacity := targetCoinToBuy(s, initialPrice)
+			// do.BuyCoin(s, targetCoin.Symbol, initialPrice, targetCoinCapacity)
 			log.Printf("The coins %s is bought at a price of %s", targetCoin.Symbol, initialPrice)
 
 		}
@@ -105,10 +106,10 @@ func iterateAndSetTargetCoin(snaps models.SnapshotsContainer) *kucoin.TickerMode
 // returns true is growRate is big enough
 func calcRate(oldPrice float64, newPrice float64) bool {
 
-	var threshhold float64 = 1.06
+	var threshhold float64 = 1.1
 
 	calc := newPrice / oldPrice
-	// if growing rate >6% in 15 min - than target this coin
+	// if growing rate >10% in 15 min - than target this coin
 	if calc > threshhold {
 		log.Printf("NewPrice was: %f and oldPrice: %f, which gives calc at %f", newPrice, oldPrice, calc)
 	}
@@ -124,7 +125,8 @@ func timeBomb(s *kucoin.ApiService, targetCoin *kucoin.TickerModel) {
 		defer logFile.Close()
 		log.SetOutput(logFile)
 		log.Printf("timer has cleared")
-		sellCoinMarket(s, targetCoin)
+		// uncomment for real time scenario
+		// sellCoinMarket(s, targetCoin)
 		reseteValues()
 		return
 	}
@@ -209,18 +211,19 @@ func assesAndSell(s *kucoin.ApiService, stats kucoin.Stats24hrModel, initialPric
 
 	priceDiff := price / initPrice
 
-	// if rise by 6.5% more fix the profit
-	if priceDiff > 1.065 {
-		targetCoinCapacity := targetCoinCapacity(s, stats.Symbol)
-		do.SellCoin(s, stats.Symbol, stats.Last, targetCoinCapacity)
+	// if rise by 10% more fix the profit
+	if priceDiff > 1.1 {
+		// uncomment for real time scenario
+		// targetCoinCapacity := targetCoinCapacity(s, stats.Symbol)
+		// do.SellCoin(s, stats.Symbol, stats.Last, targetCoinCapacity)
 		log.Printf("[PROFIT] Time to sell %s with current price: %s", stats.Symbol, stats.Last)
 		return true
 	}
-	// if fall by 5.5% + 5% (simulation correction) sell to stop loss
-	if priceDiff < 0.895 {
-		targetCoinCapacity := targetCoinCapacity(s, stats.Symbol)
-		do.SellCoin(s, stats.Symbol, stats.Last, targetCoinCapacity)
-		log.Printf("[STOPLOSS] Time to sell %s with current price: %s", stats.Symbol, stats.Last)
+	// if fall by 5.5% (simulation correction) sell to stop loss
+	if priceDiff < 0.945 {
+		// uncomment for real time scenario
+		// sellCoinMarket(s, targetCoin)
+		log.Printf("[STOPLOSS] Time to sell %s with aprx price: %s", stats.Symbol, stats.Last)
 		return true
 	}
 
