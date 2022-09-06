@@ -41,8 +41,8 @@ func GrowScraping(s *kucoin.ApiService) {
 		filteredCoins := filterCoins(coins)
 
 		snapsCounter++
-		// every 15 min (10 sec * 90 = 900 sec)
-		if snapsCounter == 90 {
+		// every 15 min (10 sec * 60 = 600 sec)
+		if snapsCounter == 60 {
 			snapsCounter = 0
 			snaps.AddSnapshotAndReplace(filteredCoins)
 		}
@@ -106,10 +106,10 @@ func iterateAndSetTargetCoin(snaps models.SnapshotsContainer) *kucoin.TickerMode
 // returns true is growRate is big enough
 func calcRate(oldPrice float64, newPrice float64) bool {
 
-	var threshhold float64 = 1.1
+	var threshhold float64 = 1.07
 
 	calc := newPrice / oldPrice
-	// if growing rate >10% in 15 min - than target this coin
+	// if growing rate >7% in 10 min - than target this coin
 	if calc > threshhold {
 		log.Printf("NewPrice was: %f and oldPrice: %f, which gives calc at %f", newPrice, oldPrice, calc)
 	}
