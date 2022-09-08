@@ -37,14 +37,14 @@ func GrowScraping(s *kucoin.ApiService) {
 
 	//
 	if targetCoin == nil {
-		coins = do.GetAllCoinStats(s)
-		filteredCoins := filterCoins(coins)
-
 		snapsCounter++
-		// every 15 min (10 sec * 60 = 600 sec)
-		if snapsCounter == 60 {
-			snapsCounter = 0
+		// every 5 min (10 sec * 30 = 300 sec)
+		if snapsCounter == 30 {
+			coins = do.GetAllCoinStats(s)
+			filteredCoins := filterCoins(coins)
 			snaps.AddSnapshotAndReplace(filteredCoins)
+
+			snapsCounter = 0
 		}
 
 		// if enough info - look for target
@@ -52,9 +52,9 @@ func GrowScraping(s *kucoin.ApiService) {
 			targetCoin = iterateAndSetTargetCoin(snaps)
 		}
 
-		// if during 3 function above token in set
+		// if during functions above token in set
 		if targetCoin != nil {
-			// resete values 36h
+			// resete values after some time
 			if !timeBombStatus {
 				timeBombStatus = true
 				go timeBomb(s, targetCoin)
@@ -107,10 +107,10 @@ func iterateAndSetTargetCoin(snaps models.SnapshotsContainer) *kucoin.TickerMode
 // returns true is growRate is big enough
 func calcRate(oldPrice float64, newPrice float64) bool {
 
-	var threshhold float64 = 1.07
+	var threshhold float64 = 1.15
 
 	calc := newPrice / oldPrice
-	// if growing rate >7% in 10 min - than target this coin
+	// if growing rate >15% in 5 min - than target this coin
 	if calc > threshhold {
 		log.Printf("NewPrice was: %f and oldPrice: %f, which gives calc at %f", newPrice, oldPrice, calc)
 	}
@@ -215,7 +215,7 @@ func assesAndSell(s *kucoin.ApiService, stats kucoin.Stats24hrModel, initialPric
 	priceDiff := price / initPrice
 
 	// if rise by 10% more fix the profit
-	if priceDiff > 1.1 {
+	if priceDiff > 1.15 {
 		// uncomment for real time scenario
 		// targetCoinCapacity := targetCoinCapacity(s, stats.Symbol)
 		// do.SellCoin(s, stats.Symbol, stats.Last, targetCoinCapacity)

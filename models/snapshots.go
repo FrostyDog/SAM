@@ -39,6 +39,7 @@ func (cont SnapshotsContainer) DeleteSnapshot(number int) {
 	} else {
 		log.Println("Key doesn't exist in the snapshot")
 	}
+
 }
 
 func (cont SnapshotsContainer) ClearSnapshots() {
