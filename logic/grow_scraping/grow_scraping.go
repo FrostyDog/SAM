@@ -73,6 +73,7 @@ func GrowScraping(s *kucoin.ApiService) {
 		// clean-up before next cycle
 		if sold {
 			reseteValues()
+			endTimeBomb()
 		}
 	}
 }
@@ -170,10 +171,12 @@ func reseteValues() {
 	targetCoin = nil
 	initialPrice = ""
 
+	snaps.ClearSnapshots()
+}
+
+func endTimeBomb() {
 	timeBombStatus = false
 	endTimer <- true
-
-	snaps.ClearSnapshots()
 }
 
 // filter coin pair to the USDT pairs only + without levarage
