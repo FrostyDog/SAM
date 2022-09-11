@@ -111,11 +111,12 @@ func calcRate(oldPrice float64, newPrice float64) bool {
 	var falseRateCap float64 = 3.00 // eliminating every result that is bigger than 3x (high chance it is false number)
 
 	calc := newPrice / oldPrice
+	okToBuy := calc > threshhold && calc < falseRateCap
 	// if growing rate >7% in 2.5 min - than target this coin
-	if calc > threshhold && calc < falseRateCap {
+	if okToBuy {
 		log.Printf("NewPrice was: %f and oldPrice: %f, which gives calc at %f", newPrice, oldPrice, calc)
 	}
-	return calc > threshhold
+	return okToBuy
 }
 
 func timeBomb(s *kucoin.ApiService, targetCoin *kucoin.TickerModel) {
@@ -216,7 +217,7 @@ func assesAndSell(s *kucoin.ApiService, stats kucoin.Stats24hrModel, initialPric
 	priceDiff := price / initPrice
 
 	// if rise by 7% more fix the profit
-	if priceDiff > 1.07 {
+	if priceDiff > 1.03 {
 		// uncomment for real time scenario
 		// targetCoinCapacity := targetCoinCapacity(s, stats.Symbol)
 		// do.SellCoin(s, stats.Symbol, stats.Sell, targetCoinCapacity)
