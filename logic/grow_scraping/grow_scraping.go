@@ -23,23 +23,21 @@ var timeBombStatus bool
 
 // update with custom short term rise calculation
 var snapsCounter int = 0
-var snaps models.SnapshotsContainer = models.NewSnapshotsContainter()
+var snaps models.SnapshotsContainer[kucoin.TickersModel] = models.NewSnapshotsContainter[kucoin.TickersModel]()
+
+// channels
+var ticker *time.Ticker = time.NewTicker(5 * time.Second)
 
 func GrowScraping(s *kucoin.ApiService) {
 	logFile, _ := os.OpenFile("log.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	defer logFile.Close()
 	log.SetOutput(logFile)
 
-	// if there is an order waiting to be executed - return and stop this function iteration.
-	if do.OrderExists(s) {
-		return
-	}
-
-	//
+	// put a ticker somewhere here
 	if targetCoin == nil {
 		snapsCounter++
-		// every 2.5 min (10 sec * 15 = 150 sec)
-		if snapsCounter == 15 {
+		// every 15 sec (5 sec * 3 = 15 sec)
+		if snapsCounter == 3 {
 			coins = do.GetAllCoinStats(s)
 			filteredCoins := filterCoins(coins)
 			snaps.AddSnapshotAndReplace(filteredCoins)
@@ -66,9 +64,9 @@ func GrowScraping(s *kucoin.ApiService) {
 
 		}
 	} else { //case for local testing
-		currentStats := do.Get24hStats(s, targetCoin.Symbol)
+		currentPrice := 
 		// sell a coin during asses and sell
-		var sold bool = assesAndSell(s, currentStats, initialPrice)
+		var sold bool = assesAndSell(s, currentPrice, initialPrice)
 
 		// clean-up before next cycle
 		if sold {
@@ -79,24 +77,24 @@ func GrowScraping(s *kucoin.ApiService) {
 }
 
 // Search for a target coin in all coins, returns coin and initial growth rate
-func iterateAndSetTargetCoin(snaps models.SnapshotsContainer) *kucoin.TickerModel {
+func iterateAndSetTargetCoin(snaps models.SnapshotsContainer[kucoin.TickersModel]) *kucoin.TickerModel {
 
 	for i, coin := range snaps[0] {
 		newerData := snaps[1][i]
 
-		priceOld, err := strconv.ParseFloat(coin.Buy, 64)
+		priceOld, err := strconv.ParseFloat(coin.Last, 64)
 		if err != nil {
 			log.Printf("Error during converstion: %v", err)
 		}
 
-		priceNewer, err := strconv.ParseFloat(newerData.Buy, 64)
+		priceNewer, err := strconv.ParseFloat(newerData.Last, 64)
 		if err != nil {
 			log.Printf("Error during converstion: %v", err)
 		}
 
 		if calcRate(priceOld, priceNewer) {
 			// setting initial price to the latest (that used as the base for counting)
-			initialPrice = newerData.Buy
+			initialPrice = newerData.Last
 			return coin
 		}
 	}
@@ -107,12 +105,12 @@ func iterateAndSetTargetCoin(snaps models.SnapshotsContainer) *kucoin.TickerMode
 // returns true is growRate is big enough
 func calcRate(oldPrice float64, newPrice float64) bool {
 
-	var threshhold float64 = 1.05   //grow rate
-	var falseRateCap float64 = 3.00 // eliminating every result that is bigger than 3x (high chance it is false number)
+	var threshhold float64 = 1.02  //grow rate
+	var falseRateCap float64 = 1.4 // eliminating every result that is bigger than 3x (high chance it is false number)
 
 	calc := newPrice / oldPrice
 	okToBuy := calc > threshhold && calc < falseRateCap
-	// if growing rate >7% in 2.5 min - than target this coin
+	// if growing rate is more than threshhold - than target this coin
 	if okToBuy {
 		log.Printf("NewPrice was: %f and oldPrice: %f, which gives calc at %f", newPrice, oldPrice, calc)
 	}
@@ -203,8 +201,8 @@ func targetCoinSymbol(symbol string) string {
 }
 
 // assesing and selling the coin
-func assesAndSell(s *kucoin.ApiService, stats kucoin.Stats24hrModel, initialPrice string) bool {
-	price, err := strconv.ParseFloat(stats.Sell, 64)
+func assesAndSell(s *kucoin.ApiService, currentPrice string, initialPrice string) bool {
+	price, err := strconv.ParseFloat(currentPrice, 64)
 	if err != nil {
 		log.Printf("error when parsing current price: %v", err)
 	}
@@ -216,42 +214,22 @@ func assesAndSell(s *kucoin.ApiService, stats kucoin.Stats24hrModel, initialPric
 
 	priceDiff := price / initPrice
 
-	// if rise by 7% more fix the profit
-	if priceDiff > 1.03 {
+	// if rise by 3.5% more fix the profit
+	if priceDiff > 1.035 {
 		// uncomment for real time scenario
 		// targetCoinCapacity := targetCoinCapacity(s, stats.Symbol)
-		// do.SellCoin(s, stats.Symbol, stats.Sell, targetCoinCapacity)
-		log.Printf("[PROFIT] Time to sell %s with current price: %s", stats.Symbol, stats.Sell)
+		// do.SellCoin(s, stats.Symbol, stats.Last, targetCoinCapacity)
+		log.Printf("[PROFIT] Time to sell %s coin with current price: %s", targetCoin.Symbol, currentPrice)
 		return true
 	}
 	// if fall by 5.5% (simulation correction) sell to stop loss
 	if priceDiff < 0.945 {
 		// uncomment for real time scenario
 		// sellCoinMarket(s, targetCoin)
-		log.Printf("[STOPLOSS] Time to sell %s with aprx price: %s", stats.Symbol, stats.Sell)
+		log.Printf("[STOPLOSS] Time to sell %s coin with aprx price: %s", targetCoin.Symbol, currentPrice)
 		return true
 	}
 
 	return false
 
 }
-
-// compare growsRate and returns coin with largest growth Rate
-// func compareCoins(previousCoin *kucoin.TickerModel, laterCoin *kucoin.TickerModel) *kucoin.TickerModel {
-
-// 	changeRate1, err := strconv.ParseFloat(previousCoin.ChangeRate, 64)
-// 	if err != nil {
-// 		log.Printf("error when comparing coins [pasing value]: %v", err)
-// 	}
-
-// 	changeRate2, err := strconv.ParseFloat(laterCoin.ChangeRate, 64)
-// 	if err != nil {
-// 		log.Printf("error when comparing coins [pasing value]: %v", err)
-// 	}
-
-// 	if changeRate1-changeRate2 > 0 {
-// 		return previousCoin
-// 	} else {
-// 		return laterCoin
-// 	}
-// }

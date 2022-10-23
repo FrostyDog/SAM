@@ -1,1 +1,0 @@
-2022/09/05 11:46:04 NewPrice was: 0.031620 and oldPrice: 0.031590, which gives calc at 1.000950

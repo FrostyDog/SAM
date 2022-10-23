@@ -24,18 +24,17 @@ func start(host string, port int, cert string, key string) {
 
 	log.Println(fmt.Printf("Starting API server on %s:%d\n", host, port))
 
-	if err := http.ListenAndServeTLS(fmt.Sprintf("%s:%d", host, port), cert, key, r); err != nil {
+	if err := http.ListenAndServe(fmt.Sprintf("%s:%d", host, port), r); err != nil {
 		log.Fatal(err)
 	}
 }
-
 func StartServer() {
 	host := os.Getenv("HOST")
 	port, err := strconv.Atoi(os.Getenv("PORT"))
 	cert := "/etc/letsencrypt/live/api.frostydog.space/fullchain.pem"
 	key := "/etc/letsencrypt/live/api.frostydog.space/privkey.pem"
 	if err != nil {
-		port = 443
+		port = 8081
 	}
 	start(host, port, cert, key)
 

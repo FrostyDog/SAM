@@ -13,37 +13,60 @@ type Executable func(s *kucoin.ApiService)
 
 type Task struct {
 	ticker    *time.Ticker
+	isTicker  bool
 	fn        Executable
 	closeChan chan bool
 	Status    bool
 }
 
-var CurrentTask Task = createNewTask()
+var CurrentTask Task = createNewTask(logic.GrowScraping)
 
 func (t *Task) stop() {
 	t.closeChan <- true
 	t.Status = false
 }
+
+// two behavior ways based on isTicker needed or not - ws not require Ticker
 func (t *Task) run() {
-	t.Status = true
-	fmt.Println("Running task")
-	go func() {
-		for _ = range t.ticker.C {
+	// if the ticker is running
+	if t.isTicker {
+		t.Status = true
+		fmt.Println("Running task")
+		go func() {
+			for _ = range t.ticker.C {
+				t.fn(kucoin_api.S)
+				select {
+				case <-t.closeChan:
+					fmt.Println("stopping")
+					return
+				default:
+					continue
+				}
+			}
+		}()
+	} else {
+		t.Status = true
+		fmt.Println("Running task")
+		go func() {
 			t.fn(kucoin_api.S)
 			select {
 			case <-t.closeChan:
 				fmt.Println("stopping")
 				return
-			default:
-				continue
 			}
-		}
-	}()
+		}()
+	}
 }
 
-func createNewTask() Task {
+func createNewTask(fn Executable) Task {
 	var closeCh = make(chan bool)
-	task := Task{ticker: time.NewTicker(10 * time.Second), fn: logic.GrowScraping, Status: false, closeChan: closeCh}
+	task := Task{isTicker: false, fn: fn, Status: false, closeChan: closeCh}
+	return task
+}
+
+func createNewTickerTask(fn Executable) Task {
+	var closeCh = make(chan bool)
+	task := Task{isTicker: false, ticker: time.NewTicker(10 * time.Second), fn: fn, Status: false, closeChan: closeCh}
 	return task
 }
 

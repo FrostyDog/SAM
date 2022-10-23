@@ -6,14 +6,17 @@ import (
 	"github.com/Kucoin/kucoin-go-sdk"
 )
 
-type SnapshotsContainer map[int]kucoin.TickersModel
+type content interface {
+	kucoin.TickersModel | TickerPrices
+}
+type SnapshotsContainer[T content] map[int]T
 
-func NewSnapshotsContainter() SnapshotsContainer {
-	return SnapshotsContainer{}
+func NewSnapshotsContainter[T content]() SnapshotsContainer[T] {
+	return SnapshotsContainer[T]{}
 }
 
 // Appending snap while removing left-hand value (max snaps = 2)
-func (cont SnapshotsContainer) AddSnapshotAndReplace(list kucoin.TickersModel) {
+func (cont SnapshotsContainer[T]) AddSnapshotAndReplace(list T) {
 	switch len(cont) {
 	case 0:
 		cont[0] = list
@@ -25,15 +28,15 @@ func (cont SnapshotsContainer) AddSnapshotAndReplace(list kucoin.TickersModel) {
 	}
 }
 
-func (cont SnapshotsContainer) AddSnapshot(list kucoin.TickersModel) {
+func (cont SnapshotsContainer[T]) AddSnapshot(list T) {
 	cont[len(cont)] = list
 }
 
-func (cont SnapshotsContainer) AddSnapshotAtIndex(list kucoin.TickersModel, number int) {
+func (cont SnapshotsContainer[T]) AddSnapshotAtIndex(list T, number int) {
 	cont[number] = list
 }
 
-func (cont SnapshotsContainer) DeleteSnapshot(number int) {
+func (cont SnapshotsContainer[T]) DeleteSnapshot(number int) {
 	if _, ok := cont[number]; ok {
 		delete(cont, number)
 	} else {
@@ -42,7 +45,7 @@ func (cont SnapshotsContainer) DeleteSnapshot(number int) {
 
 }
 
-func (cont SnapshotsContainer) ClearSnapshots() {
+func (cont SnapshotsContainer[T]) ClearSnapshots() {
 	for key := range cont {
 		delete(cont, key)
 	}
