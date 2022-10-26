@@ -10,7 +10,7 @@ import (
 
 	"github.com/FrostyDog/SAM/config"
 	"github.com/FrostyDog/SAM/do"
-	api "github.com/FrostyDog/SAM/kucoin-api"
+	api "github.com/FrostyDog/SAM/third-party/kucoin-api"
 	"github.com/FrostyDog/SAM/utility"
 
 	"github.com/Kucoin/kucoin-go-sdk"
@@ -45,7 +45,7 @@ func LaunchMarketToleranceTicker(s *kucoin.ApiService, primarySymbol string, sec
 	}
 
 	for _ = range ticker.C {
-		stats := do.GetCurrentStats(api.S, tradingPair)
+		stats := do.Get24hStats(api.S, tradingPair)
 
 		// dayChange, _ = strconv.ParseFloat(stats.ChangeRate, 64)
 
@@ -86,7 +86,7 @@ func LaunchMarketToleranceTicker(s *kucoin.ApiService, primarySymbol string, sec
 		if canSell && primaryCapability > 0 {
 			log.Printf("Time to sell, current change: %v \n With Price Of start: %v and current is %v \n", currentChange, startPrice, currentPrice)
 			fmt.Printf("Time to sell, current change: %v \n With Price Of start: %v and current is %v \n", currentChange, startPrice, currentPrice)
-			do.MarketOrder(api.S, "sell", tradingPair, tradeAmount)
+			do.MarketOrder(api.S, "sell", tradingPair, tradeAmount, "")
 			priceChangeList = nil
 			startPrice = 0
 			sideIndicator = sideIndicator + 1.00 //harder to sell second time
@@ -95,7 +95,7 @@ func LaunchMarketToleranceTicker(s *kucoin.ApiService, primarySymbol string, sec
 		if canBuy && secondaryCapability > 0 {
 			log.Printf("Time to buy, current change: %v \n With Price Of start: %v and current is %v \n", currentChange, startPrice, currentPrice)
 			fmt.Printf("Time to buy, current change: %v \n With Price Of start: %v and current is %v \n", currentChange, startPrice, currentPrice)
-			do.MarketOrder(api.S, "buy", tradingPair, tradeAmount)
+			do.MarketOrder(api.S, "buy", tradingPair, tradeAmount, "")
 			priceChangeList = nil
 			startPrice = 0
 			sideIndicator = sideIndicator - 1.00 //harder to buy second time

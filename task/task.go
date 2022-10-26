@@ -19,7 +19,7 @@ type Task struct {
 	Status    bool
 }
 
-var CurrentTask Task = createNewTask(logic.GrowScraping)
+var CurrentTask Task = createNewTickerTask(logic.GrowScraping)
 
 func (t *Task) stop() {
 	t.closeChan <- true
@@ -58,15 +58,17 @@ func (t *Task) run() {
 	}
 }
 
+// Create a task without timer. (Timer could be implemente in task function itself)
 func createNewTask(fn Executable) Task {
 	var closeCh = make(chan bool)
 	task := Task{isTicker: false, fn: fn, Status: false, closeChan: closeCh}
 	return task
 }
 
+// Creating a task with a ticker of the task level.
 func createNewTickerTask(fn Executable) Task {
 	var closeCh = make(chan bool)
-	task := Task{isTicker: false, ticker: time.NewTicker(10 * time.Second), fn: fn, Status: false, closeChan: closeCh}
+	task := Task{isTicker: false, ticker: time.NewTicker(5 * time.Second), fn: fn, Status: false, closeChan: closeCh}
 	return task
 }
 

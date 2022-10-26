@@ -2,12 +2,9 @@ package main
 
 import (
 	"github.com/FrostyDog/SAM/api"
-	"github.com/FrostyDog/SAM/task"
 )
 
 func main() {
-	// manually initialize the task and server
-	task.RunTask(&task.CurrentTask)
+	// starts the server without starting a task. (could be started from front-end)
 	api.StartServer()
-
 }

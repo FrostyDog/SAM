@@ -65,6 +65,27 @@ func CalculatePrice(side string, currentPrice string) (targetPrice string) {
 
 }
 
+func GetTickerLevel1(s *kucoin.ApiService, symbol string) kucoin.TickerLevel1Model {
+	var rsp *kucoin.ApiResponse
+	var err error
+
+	for {
+		rsp, err = s.TickerLevel1(symbol)
+		if err == nil {
+			break
+		} else {
+			log.Printf("[Retrying] Error in getting TickerLevel1 %v", err)
+		}
+	}
+
+	stats := kucoin.TickerLevel1Model{}
+	if err := rsp.ReadData(&stats); err != nil {
+		fmt.Println("some error during reading in tickerLevel1")
+	}
+
+	return stats
+}
+
 // Median between 24h Median Price and Current price
 func GetCorrelationPrice(s *kucoin.ApiService, symbol string) (correlactionPrice string) {
 

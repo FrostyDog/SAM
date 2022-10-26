@@ -25,9 +25,6 @@ var timeBombStatus bool
 var snapsCounter int = 0
 var snaps models.SnapshotsContainer[kucoin.TickersModel] = models.NewSnapshotsContainter[kucoin.TickersModel]()
 
-// channels
-var ticker *time.Ticker = time.NewTicker(5 * time.Second)
-
 func GrowScraping(s *kucoin.ApiService) {
 	logFile, _ := os.OpenFile("log.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	defer logFile.Close()
@@ -63,8 +60,9 @@ func GrowScraping(s *kucoin.ApiService) {
 			log.Printf("The coins %s is bought at a price of %s", targetCoin.Symbol, initialPrice)
 
 		}
-	} else { //case for local testing
-		currentPrice := 
+	} else {
+		//case for local testing
+		currentPrice := do.GetTickerLevel1(s, targetCoin.Symbol).Price
 		// sell a coin during asses and sell
 		var sold bool = assesAndSell(s, currentPrice, initialPrice)
 
@@ -222,8 +220,8 @@ func assesAndSell(s *kucoin.ApiService, currentPrice string, initialPrice string
 		log.Printf("[PROFIT] Time to sell %s coin with current price: %s", targetCoin.Symbol, currentPrice)
 		return true
 	}
-	// if fall by 5.5% (simulation correction) sell to stop loss
-	if priceDiff < 0.945 {
+	// if fall by 2.5% (simulation correction) sell to stop loss
+	if priceDiff < 0.975 {
 		// uncomment for real time scenario
 		// sellCoinMarket(s, targetCoin)
 		log.Printf("[STOPLOSS] Time to sell %s coin with aprx price: %s", targetCoin.Symbol, currentPrice)
