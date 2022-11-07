@@ -1,7 +1,6 @@
-# SAM bot
+# SAM v2.0 bot
 
-Trading bot for handling by FrostyDog/Konami.
-
+Manager for crypto trading bots.
 
 
 ## Commands:

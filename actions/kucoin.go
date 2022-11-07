@@ -1,11 +1,10 @@
-package do
+package kucoin_actions
 
 import (
 	"fmt"
 	"log"
 	"strconv"
 
-	"github.com/FrostyDog/SAM/config"
 	"github.com/FrostyDog/SAM/utility"
 
 	"github.com/Kucoin/kucoin-go-sdk"
@@ -40,29 +39,6 @@ func OrderExists(s *kucoin.ApiService) bool {
 	}
 
 	return len(as) != 0
-}
-
-func CalculatePrice(side string, currentPrice string) (targetPrice string) {
-	if side == "sell" {
-		t, err := strconv.ParseFloat(currentPrice, 64)
-		if err != nil {
-			fmt.Println("error accured during parsing")
-		}
-		var p float64 = t + t*config.BaseMargin
-		return fmt.Sprint(utility.RoundFloat(p, config.DecimalPointNumber))
-	}
-
-	if side == "buy" {
-		t, err := strconv.ParseFloat(currentPrice, 64)
-		if err != nil {
-			fmt.Println("error accured during parsing")
-		}
-		var p float64 = t - t*config.BaseMargin
-		return fmt.Sprint(utility.RoundFloat(p, config.DecimalPointNumber))
-	}
-
-	return
-
 }
 
 func GetTickerLevel1(s *kucoin.ApiService, symbol string) kucoin.TickerLevel1Model {
@@ -163,14 +139,6 @@ func Get24hStats(s *kucoin.ApiService, symbol string) (stats kucoin.Stats24hrMod
 // Creates an order to buy a coin.
 func BuyCoin(s *kucoin.ApiService, sy string, price string, size string) (nextOperation string) {
 
-	if size == "" {
-		size = config.TradingSize
-	}
-
-	if sy == "" {
-		sy = config.TradingPair
-	}
-
 	o := kucoin.CreateOrderModel{ClientOid: uuid.New().String(), Side: "buy", Symbol: sy, Price: price, Size: size}
 
 	res, err := s.CreateOrder(&o)
@@ -182,14 +150,6 @@ func BuyCoin(s *kucoin.ApiService, sy string, price string, size string) (nextOp
 
 // Creates an order to sell a coin.
 func SellCoin(s *kucoin.ApiService, sy string, price string, size string) (nextOperation string) {
-
-	if size == "" {
-		size = config.TradingSize
-	}
-
-	if sy == "" {
-		sy = config.TradingPair
-	}
 
 	o := kucoin.CreateOrderModel{ClientOid: uuid.New().String(), Side: "sell", Symbol: sy, Price: price, Size: size}
 
@@ -206,15 +166,6 @@ func MarketOrder(s *kucoin.ApiService, side string, sy string, size string, base
 	if baseOrQuote == "" {
 		baseOrQuote = "base"
 	}
-
-	if size == "" {
-		size = config.TradingSize
-	}
-
-	if sy == "" {
-		sy = config.TradingPair
-	}
-
 	o := kucoin.CreateOrderModel{}
 
 	// if set to "base" sell size with base currency else with quote(second placed)
