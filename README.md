@@ -1,8 +1,6 @@
 # SAM bot
 
-Trading bot for handling by FrostyDog/Konami.
-
-
+Crypto Trading bot for handling by FrostyDog/Konami
 
 ## Commands:
 
@@ -20,14 +18,12 @@ Trading bot for handling by FrostyDog/Konami.
 
 ## Quick start (commands)
 
-Some text
-
 - `go run main.go`: to run the start-point of the program
 - `go build`: to compile a binary
 
 ## Status
 
-On-going
+Repo Archived and not supported anymore.
 
 ## What's included
 
